@@ -1,0 +1,23 @@
+# Branch map: the machine-readable story structure. QA checks scripts against this.
+start: scene_01
+acts:
+  - id: act1
+    title: "Act title"
+    purpose: "What this act establishes"
+    scenes:
+      - id: scene_01
+        title: "Scene title"
+        purpose: "Why this scene exists (plot, character, theme)"
+        characters: [mara]
+        leads_to: [scene_02a, scene_02b]
+        gates:                       # optional: conditions on specific exits
+          scene_02b: "$mara_aff >= 5"
+        loops: [relationships]       # loop modules touched here
+endings:
+  - id: escaped
+    title: "Free at Last"
+    scene: scene_09
+    requires: "$mara_aff >= 5"
+    theme: "Trust is earned"
+variables:                           # story flags not owned by a loop module (name: initial value)
+  lied_to_mara: false

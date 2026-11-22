@@ -1,0 +1,7 @@
+modules:
+  - id: bonds
+    type: stats
+    doc: design/loops/bonds.md
+    params:
+      stats:
+        - { var: wren_trust, label: "Wren's trust", min: 0, max: 10, init: 3 }

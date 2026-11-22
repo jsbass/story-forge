@@ -1,0 +1,8 @@
+/* Twine Forge module: stats */
+.forge-stats { display: flex; flex-direction: column; gap: 0.4em; margin-top: 0.5em; font-size: 0.9em; }
+.forge-stat { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; column-gap: 0.5em; }
+.forge-stat-label { grid-column: 1; }
+.forge-stat-value { grid-column: 2; text-align: right; }
+.forge-stat meter { grid-column: 1 / span 2; width: 100%; }
+.forge-toast-up { border-left: 4px solid #4caf50; }
+.forge-toast-down { border-left: 4px solid #e57373; }

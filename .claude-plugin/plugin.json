@@ -1,0 +1,5 @@
+{
+  "name": "forge",
+  "version": "0.1.0",
+  "description": "Twine Forge: role-based Claude agents that plan, write, build and QA Twine (SugarCube 2) games, with an approval gate after every stage."
+}

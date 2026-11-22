@@ -1,0 +1,16 @@
+{
+  "name": "twine-forge",
+  "version": "0.1.0",
+  "description": "Claude Code plugin: agent pipeline that turns a game idea into a tested Twine (SugarCube 2) game.",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "forge": "tools/forge.mjs"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

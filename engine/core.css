@@ -1,0 +1,42 @@
+/* Twine Forge runtime - core styles */
+:root {
+  --forge-text-scale: 1;
+  --forge-accent: #c9a227;
+  --forge-muted: #9aa0a6;
+}
+#passages { font-size: calc(1em * var(--forge-text-scale)); line-height: 1.6; }
+.passage p { margin: 0 0 1em; }
+
+.forge-line { margin: 0 0 0.9em; }
+.forge-speaker { font-weight: 700; color: var(--forge-speaker-color, inherit); }
+.forge-speaker::after { content: ':'; margin-right: 0.4em; }
+.forge-paren { font-style: italic; color: var(--forge-muted); margin-right: 0.4em; }
+
+.forge-choices { margin-top: 1.5em; display: flex; flex-direction: column; gap: 0.5em; }
+.forge-choice a {
+  display: block; padding: 0.6em 0.9em; border: 1px solid currentColor; border-radius: 6px;
+  text-decoration: none; transition: background-color 0.15s ease;
+}
+.forge-choice a:hover, .forge-choice a:focus { background-color: rgba(255, 255, 255, 0.08); }
+.forge-choice-disabled span {
+  display: block; padding: 0.6em 0.9em; border: 1px dashed var(--forge-muted); border-radius: 6px;
+  color: var(--forge-muted); cursor: not-allowed;
+}
+
+.forge-ending { margin-top: 2em; padding: 1.5em; border-top: 2px solid var(--forge-accent); text-align: center; }
+.forge-ending-label { text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.8em; color: var(--forge-muted); }
+.forge-ending-title { margin: 0.3em 0 1em; }
+
+.forge-toast {
+  position: fixed; left: 50%; bottom: 2em; transform: translateX(-50%); z-index: 1000;
+  padding: 0.5em 1em; border-radius: 6px; background: rgba(0, 0, 0, 0.85); color: #fff;
+  transition: opacity 0.5s ease;
+}
+.forge-toast-out { opacity: 0; }
+
+.forge-reduced-motion *, .forge-reduced-motion *::before, .forge-reduced-motion *::after {
+  transition: none !important; animation: none !important;
+}
+@media (max-width: 600px) {
+  .forge-choice a, .forge-choice-disabled span { padding: 0.8em; }
+}

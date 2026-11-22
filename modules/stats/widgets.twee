@@ -1,0 +1,3 @@
+:: stats-widgets [widget nobr]
+<<widget "stat">><<run setup.forge.stats.change(_args[0], _args[1])>><</widget>>
+<<widget "stats_panel">><div class="forge-stats"><<for _fs range setup.forge.stats.visible()>><div class="forge-stat"><span class="forge-stat-label"><<= _fs.label>></span><meter @min="_fs.min" @max="_fs.max" @value="State.variables[_fs.var]"></meter><span class="forge-stat-value"><<= State.variables[_fs.var]>></span></div><</for>></div><</widget>>

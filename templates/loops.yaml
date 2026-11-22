@@ -1,0 +1,8 @@
+# Active loop modules. Each module type lives in the plugin's modules/<type>/ folder.
+modules:
+  - id: relationships
+    type: stats
+    doc: design/loops/relationships.md
+    params:
+      stats:
+        - { var: mara_aff, label: "Mara", min: 0, max: 10, init: 3, visible: true, notify: true }

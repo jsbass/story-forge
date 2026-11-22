@@ -1,0 +1,38 @@
+# Character sheet: the source of truth for Character & Dialog QA.
+id: mara                      # lowercase; speaker tag MARA in scripts maps to this id
+name: Mara Vell
+role: deuteragonist           # protagonist | deuteragonist | antagonist | supporting | minor
+age: 34
+summary: "One sentence a writer can hold in their head."
+voice:
+  register: "terse, dry humor"
+  vocabulary: ["nautical slang", "avoids profanity"]
+  speech_tics: ["Right then.", "rhetorical questions when nervous"]
+  never_says: ["modern slang", "honestly"]
+  sample_lines:
+    - "Right then. Water's at the second rung."
+personality:
+  values: [loyalty, competence]
+  fears: [deep water]
+  flaws: [stubborn]
+  wants: "to keep the crew alive"
+  needs: "to trust someone again"
+knowledge:                    # what they know and from which scene (QA flags earlier mentions)
+  - fact: "The captain is alive"
+    learned_at: scene_07
+relationships:
+  player:
+    initial: wary
+    affinity_var: mara_aff    # story variable (no $); usually owned by a stats loop module
+    affinity_init: 3
+  captain: "fiercely loyal"
+arc:
+  start: "trusts no one"
+  turn: scene_12
+  end: "chooses the crew over the ship"
+ui:
+  color: "#7fb7be"            # speaker name color
+visual:                       # used by the Phase 2 asset generator
+  description: "Weathered, short dark hair, oilskin coat"
+  palette: []
+  ref_images: []

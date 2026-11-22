@@ -1,0 +1,48 @@
+start: arrival
+acts:
+  - id: act1
+    title: "The Storm"
+    purpose: "Meet Wren, learn the lantern is failing, choose how to spend the night"
+    scenes:
+      - id: arrival
+        title: "Arrival at the Lighthouse"
+        purpose: "Establish the storm, Wren, and the dying lantern"
+        characters: [wren]
+        leads_to: [stairs, cellar]
+        loops: [bonds]
+      - id: stairs
+        title: "The Long Stair"
+        purpose: "Wren opens up about her brother; trust is tested"
+        characters: [wren]
+        leads_to: [lamp_room]
+      - id: cellar
+        title: "The Cellar"
+        purpose: "Find the oil and the old keeper's log"
+        characters: [wren]
+        leads_to: [lamp_room]
+  - id: act2
+    title: "The Light"
+    purpose: "Relight the lantern; the ending depends on trust"
+    scenes:
+      - id: lamp_room
+        title: "The Lamp Room"
+        purpose: "Climax: Wren must hold the ladder while you relight the lamp"
+        characters: [wren]
+        leads_to: [dawn]
+        gates:
+          dawn: "$wren_trust >= 6"
+endings:
+  - id: dawn
+    title: "Dawn Together"
+    scene: lamp_room
+    requires: "$wren_trust >= 6"
+  - id: alone
+    title: "The Long Dark"
+    scene: lamp_room
+    requires: "$wren_trust < 6"
+  - id: wrecked
+    title: "Lost to the Rocks"
+    scene: cellar
+    requires: "always"
+variables:
+  found_log: false
