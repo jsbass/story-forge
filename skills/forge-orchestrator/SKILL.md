@@ -18,9 +18,12 @@ You run the pipeline. The role agents do the creative and technical work. You ho
 | 3 | `characters` | `character-designer` agent | `characters/*.yaml`, `characters/*.md` |
 | 4 | `loops` | **You** run the loop conversation (`loop-design` skill), then the `loop-designer` agent writes it up | `design/loops/*` |
 | 5 | `script` | `dialog-writer` agent | `script/*.script.md` |
-| 6 | `build` | `game-builder` agent | `src/**`, `build/**` |
-| 7 | `qa` | `qa-functional` and `qa-character` agents, **in parallel** | `qa/reports/<build>/` |
-| 8 | `playtest` | **The user** plays the dev build | feedback |
+| 6 | `assets` | `asset-generator` agent, plus the user's review in the gallery | `assets/manifest.yaml`, `assets/final/**` |
+| 7 | `build` | `game-builder` agent | `src/**`, `build/**` |
+| 8 | `qa` | `qa-functional` and `qa-character` agents, **in parallel** | `qa/reports/<build>/` |
+| 9 | `playtest` | **The user** plays the dev build | feedback |
+
+The art style and model choices are made during the interview (stage 1), using the `art-direction` skill. Reference portraits (`<char>.ref`) may be generated as soon as `characters` is approved, before the `assets` stage formally starts.
 
 When the plugin is installed, the agents appear with the plugin prefix (e.g. `forge:dialog-writer`). Use whichever name the Agent tool lists.
 
@@ -73,6 +76,17 @@ After `build`, run `qa-functional` and `qa-character` in parallel, then combine 
 
 The `qa` stage can be approved when there are no open S1/S2 findings, or when the user explicitly accepts the ones that remain.
 
+## Assets
+
+1. `node .forge/forge.mjs assess` (if the last scan is more than 7 days old), then `node .forge/forge.mjs assets sync`.
+2. Work in **batches**, in this order: character reference portraits, then backgrounds, then other portraits, then UI, then sfx/ambience, then music, then video. Brief the `asset-generator` agent with one batch at a time.
+3. Generation is slow and uses the single GPU. Run `assets generate` batches in the background (`run_in_background`) and wait for the notification rather than polling. `assets list` shows progress.
+4. **Batch gate:** start `node .forge/forge.mjs assets review` in the background and open `http://127.0.0.1:4174/` in the browser pane (or point the user at `assets/review/index.html`). The user approves a candidate or rejects with a note. Rejections are logged as feedback routed to `asset-generator`. Never approve assets on the user's behalf.
+5. Assets marked `blocked_capability` can't be made on this machine yet. They show as "pending" chips in dev builds and are skipped in release builds. Offer `/forge:upgrade-assets` to unblock them; don't install anything without the user's approval.
+6. Submit the `assets` stage once every asset is approved, or once the user accepts the remaining placeholders. Then run the gate.
+
+**Model installs:** `forge models install|node-pack|install-civitai` all require `--yes`. Pass it only after the user has approved that specific item in this conversation, with its size and licence shown.
+
 ## Playtest
 
 1. `node .forge/forge.mjs build`.
@@ -88,4 +102,4 @@ The `qa` stage can be approved when there are no open S1/S2 findings, or when th
 - Don't let agents approve or submit stages. Only you do that, and only after the user approves at the gate.
 - Don't regenerate downstream work without the impact list and the user's OK.
 - Don't edit generated folders (`src/story`, `src/engine`, `src/modules`).
-- Phase 2 features (assets, ComfyUI, optimization, packaging) aren't built yet. Record requests for them as feedback with `--stage assets` and tell the user they're planned.
+- Phase 3 features (performance optimization, packaging for itch.io, single-HTML, web and desktop) aren't built yet. Record requests for them as feedback with `--stage release` and tell the user they're planned.

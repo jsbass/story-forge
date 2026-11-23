@@ -1,0 +1,130 @@
+{
+  "comment": "Models the Platform Assessor may propose. URLs and SHA-256 hashes verified 2026-11-22. Nothing here is downloaded without explicit user approval. 'sm_folder' is the Stability Matrix shared Models subfolder; 'comfy_folder' is the ComfyUI model folder it appears in.",
+  "capabilities": {
+    "image": { "label": "Images (backgrounds, portraits, UI)", "workflows": ["sdxl-image", "sdxl-draft"] },
+    "upscale": { "label": "Upscaling (sharp full-screen backgrounds)", "workflows": ["sdxl-image-upscale"] },
+    "char_consistency": { "label": "Character consistency across portraits", "workflows": ["sdxl-ipadapter-portrait"] },
+    "sfx": { "label": "Sound effects & ambience", "workflows": ["stable-audio3-sfx", "stable-audio-sfx"] },
+    "music": { "label": "Background music", "workflows": ["ace15-music"] },
+    "video": { "label": "Video / animated scenes", "workflows": ["wan22-video"] },
+    "tts": { "label": "Voice-over (text-to-speech)", "workflows": [] }
+  },
+  "models": [
+    {
+      "id": "ipadapter-plus-sdxl",
+      "capability": "char_consistency",
+      "priority": 1,
+      "title": "IP-Adapter Plus SDXL (ViT-H) + CLIP Vision ViT-H",
+      "why": "Keeps a character's face and outfit consistent across portraits and expressions.",
+      "vram_gb": 7,
+      "license": "Apache-2.0",
+      "files": [
+        {
+          "url": "https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/ip-adapter-plus_sdxl_vit-h.safetensors",
+          "filename": "ip-adapter-plus_sdxl_vit-h.safetensors",
+          "sm_folder": "IpAdaptersXl", "comfy_folder": "ipadapter",
+          "sha256": "3f5062b8400c94b7159665b21ba5c62acdcd7682262743d7f2aefedef00e6581", "approx_gb": 0.85
+        },
+        {
+          "url": "https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors",
+          "filename": "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors",
+          "sm_folder": "ClipVision", "comfy_folder": "clip_vision",
+          "sha256": "6ca9667da1ca9e0b0f75e46bb030f7e011f44f86cbfb8d5a36590fcd7507b030", "approx_gb": 2.53
+        }
+      ],
+      "node_pack": {
+        "name": "ComfyUI_IPAdapter_plus",
+        "repo": "https://github.com/cubiq/ComfyUI_IPAdapter_plus",
+        "nodes": ["IPAdapterUnifiedLoader", "IPAdapter"],
+        "note": "Upstream is in maintenance mode (last update April 2025) but still widely used."
+      }
+    },
+    {
+      "id": "upscaler-ultrasharp",
+      "capability": "upscale",
+      "priority": 2,
+      "title": "4x-UltraSharp upscaler",
+      "why": "Sharpens 1024px renders up to full-screen resolution.",
+      "vram_gb": 2,
+      "license": "CC-BY-NC-SA-4.0 (non-commercial)",
+      "files": [
+        {
+          "url": "https://huggingface.co/Kim2091/UltraSharp/resolve/main/4x-UltraSharp.pth",
+          "filename": "4x-UltraSharp.pth",
+          "sm_folder": "ESRGAN", "comfy_folder": "upscale_models",
+          "sha256": "a5812231fc936b42af08a5edba784195495d303d5b3248c24489ef0c4021fe01", "approx_gb": 0.07
+        }
+      ]
+    },
+    {
+      "id": "stable-audio-open",
+      "capability": "sfx",
+      "priority": 3,
+      "title": "Stable Audio Open 1.0 + T5-base text encoder",
+      "why": "Sound effects and ambience loops; fits in 8 GB.",
+      "vram_gb": 6,
+      "license": "Stability AI Community License (gated: accept terms on Hugging Face)",
+      "files": [
+        {
+          "url": "https://huggingface.co/stabilityai/stable-audio-open-1.0/resolve/main/model.safetensors",
+          "filename": "stable-audio-open-1.0.safetensors",
+          "sm_folder": "StableDiffusion", "comfy_folder": "checkpoints",
+          "gated": true, "gated_page": "https://huggingface.co/stabilityai/stable-audio-open-1.0", "approx_gb": 4.9
+        },
+        {
+          "url": "https://huggingface.co/google-t5/t5-base/resolve/main/model.safetensors",
+          "filename": "t5_base.safetensors",
+          "sm_folder": "TextEncoders", "comfy_folder": "text_encoders",
+          "sha256": "a90903540cc02cbeb7ff9f823f1a80eb778c7e22426a0e620b01c77a5ec8f5b4", "approx_gb": 0.89
+        }
+      ]
+    },
+    {
+      "id": "ace-step-15-turbo",
+      "capability": "music",
+      "priority": 4,
+      "title": "ACE-Step 1.5 turbo (all-in-one)",
+      "why": "Instrumental background music; runs on 8 GB with offloading. Check speed with a test run.",
+      "vram_gb": 8,
+      "license": "Apache-2.0",
+      "files": [
+        {
+          "url": "https://huggingface.co/Comfy-Org/ACE-Step-1.5/resolve/main/checkpoints/ace_step_1.5_turbo_aio.safetensors",
+          "filename": "ace_step_1.5_turbo_aio.safetensors",
+          "sm_folder": "StableDiffusion", "comfy_folder": "checkpoints", "approx_gb": 10.03
+        }
+      ]
+    },
+    {
+      "id": "wan22-ti2v-5b",
+      "capability": "video",
+      "priority": 6,
+      "title": "Wan 2.2 TI2V 5B + UMT5-XXL fp8 text encoder (VAE already installed)",
+      "why": "Short clips (2-5 s) at 480p; several minutes each on 8 GB. Treat video as an occasional extra.",
+      "vram_gb": 8,
+      "license": "Apache-2.0",
+      "files": [
+        {
+          "url": "https://huggingface.co/Comfy-Org/Wan-2.2/resolve/main/split_files/diffusion_models/wan2.2_ti2v_5B_fp16.safetensors",
+          "filename": "wan2.2_ti2v_5B_fp16.safetensors",
+          "sm_folder": "DiffusionModels", "comfy_folder": "diffusion_models",
+          "sha256": "456f901338bd9eadbded3828b819109a9b68e8a525ca5cf8d0049a69fcfeca1e", "approx_gb": 10.0
+        },
+        {
+          "url": "https://huggingface.co/Comfy-Org/Wan-2.1/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+          "filename": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+          "sm_folder": "TextEncoders", "comfy_folder": "text_encoders",
+          "sha256": "c3355d30191f1f066b26d93fba017ae9809dce6c627dda5f6a66eaa651204f68", "approx_gb": 6.74
+        },
+        {
+          "url": "https://huggingface.co/Comfy-Org/Wan-2.2/resolve/main/split_files/vae/wan2.2_vae.safetensors",
+          "filename": "wan2.2_vae.safetensors",
+          "sm_folder": "VAE", "comfy_folder": "vae", "approx_gb": 1.31
+        }
+      ]
+    }
+  ],
+  "notes": {
+    "tts": "No local TTS node pack has been verified yet. Voice-over stays off until one is chosen and tested (Phase 2 follow-up)."
+  }
+}

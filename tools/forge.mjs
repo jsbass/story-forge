@@ -2,7 +2,8 @@
 // Twine Forge CLI. Run from inside a game project: node .forge/forge.mjs <command>
 import fs from 'node:fs';
 import path from 'node:path';
-import { requireProjectRoot, loadProject, PLUGIN_ROOT } from './lib/project.mjs';
+import { requireProjectRoot, findProjectRoot, loadProject, PLUGIN_ROOT } from './lib/project.mjs';
+import { assessCommand, modelsCommand, assetsCommand } from './assets/cli.mjs';
 import { scaffoldProject, setupProject, initialCommit } from './lib/init.mjs';
 import { STAGES, loadPipeline, savePipeline, computeStatus, nextStage, transition, artifactFiles } from './lib/state.mjs';
 import { loadDeps, saveDeps, recordDeps, impactOf, staleArtifacts } from './lib/deps.mjs';
@@ -40,6 +41,17 @@ Build & QA
   qa character [--character id]       JSON input for the character-QA agent (lines + knowledge risks)
   loops                               list loop modules and the variables they own
   template [name]                     list templates, or print one (e.g. character.yaml, forge-script)
+
+Assets (Phase 2) - anything that downloads or installs needs --yes, given only after the user approves
+  assess [--json] [--url http://127.0.0.1:8188]   scan GPU + ComfyUI, list capabilities and upgrade options
+  models catalog | install <id> --yes | node-pack <id> --yes
+  models search <query> [--type Checkpoint|LORA] [--base "SDXL 1.0,Illustrious"] | install-civitai <versionId> --yes
+  assets sync                         add/refresh manifest entries from the scripts' @media cues
+  assets list [--status s] [--kind k] | show <id>
+  assets set <id> [--prompt ..] [--negative ..] [--workflow id@v] [--param k=v ...]
+  assets generate [ids...] [--kind bg] [--count n] [--draft]
+  assets gallery | review [--port 4174] | approve <id> [--candidate n] | reject <id> --note ".."
+  assets workflows [--validate] | promote <workflow-id> | lora-dataset <character>
 `;
 
 function templateCmd(name) {
@@ -60,8 +72,10 @@ function parseArgs(argv) {
     if (a.startsWith('--')) {
       const key = a.slice(2);
       const next = argv[i + 1];
-      if (next === undefined || next.startsWith('--')) flags[key] = true;
-      else { flags[key] = next; i++; }
+      let val = true;
+      if (next !== undefined && !next.startsWith('--')) { val = next; i++; }
+      // Repeated flags (e.g. --param a=1 --param b=2) collect into an array.
+      flags[key] = key in flags ? [].concat(flags[key], val) : val;
     } else pos.push(a);
   }
   return { pos, flags };
@@ -106,6 +120,9 @@ async function main() {
   const { pos, flags } = parseArgs(rest);
   if (!cmd || cmd === 'help' || flags.help) return console.log(HELP);
   if (cmd === 'template') return templateCmd(pos[0]);
+  // These work with or without a project.
+  if (cmd === 'assess') return assessCommand(findProjectRoot(), flags);
+  if (cmd === 'models') return modelsCommand(findProjectRoot(), pos, flags);
 
   if (cmd === 'new') {
     if (!pos[0]) throw new Error('Usage: forge new <dir> --title "Title"');
@@ -212,7 +229,8 @@ async function main() {
       const info = await build(root, { modes: flags['dev-only'] ? ['dev'] : ['dev', 'release'] });
       if (flags.json) return out(info, true);
       console.log(`Build ${info.id}: ${info.storyPassages} story passages, ${info.endings.length} endings, start '${info.start}'`);
-      for (const [mode, o] of Object.entries(info.outputs)) console.log(`  ${mode.padEnd(7)} ${o.html}  (${Math.round(o.bytes / 1024)} KB)`);
+      for (const [mode, o] of Object.entries(info.outputs)) console.log(`  ${mode.padEnd(7)} ${o.html}  (${Math.round(o.bytes / 1024)} KB + ${o.mediaFiles} media files, ${Math.round(o.mediaBytes / 1024)} KB)`);
+      if (info.media.referenced) console.log(`  media: ${info.media.available}/${info.media.referenced} cues have approved assets${info.media.missing.length ? ` - pending: ${info.media.missing.slice(0, 8).join(', ')}${info.media.missing.length > 8 ? ', …' : ''}` : ''}`);
       return;
     }
 
@@ -252,6 +270,9 @@ async function main() {
       if (sub === 'character') return out(characterQaInput(root, flags.character || null), true);
       throw new Error('Usage: forge qa static|functional|character');
     }
+
+    case 'assets':
+      return assetsCommand(root, pos, flags);
 
     case 'loops': {
       const project = loadProject(root);

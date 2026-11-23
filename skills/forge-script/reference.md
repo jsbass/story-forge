@@ -34,6 +34,17 @@ Forge Script is the dialog format the Dialog Writer uses. Files live in `script/
 | `END <id> "Title"` or `END <id> — Title` | Marks the passage as an ending (it gets the `ending` tag and an ending screen). | `<<forge_ending "id" "Title">>` |
 | `<<macro …>>` | A raw SugarCube line, for loop-module widgets like `<<stat "mara_aff" 2>>`. | as written |
 
+### Media cues at runtime
+| Cue | Behaviour |
+|---|---|
+| `@bg id` | Sets the background. It **persists** until the next `@bg` and is restored on load. |
+| `@music id` / `@ambience id` | Loops on its own channel, with a crossfade when it changes. It **persists** across passages. `@music none` stops it. |
+| `@sfx id` / `@voice id` | Plays once. A new `@voice` stops the previous one. |
+| `@portrait char expr` | Shows the portrait inline, **where the cue appears**, for that passage only (floats right of the text). Defaults to `neutral`. |
+| `@video id` | Shown inline, muted and looping. |
+
+Every cue becomes an entry in `assets/manifest.yaml` (`forge assets sync`). Portraits use the id `<char>.<expr>`. Until an asset is approved, dev builds show a small "pending" chip, and release builds skip the cue.
+
 ### Choice targets
 - `scene_08` refers to a scene (or a full sub-passage name like `scene_08.dock`).
 - `.lie` refers to a sub-passage of the **current** scene (`scene_07.lie`).

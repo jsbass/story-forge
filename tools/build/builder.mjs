@@ -8,6 +8,7 @@ import { compileScript, validateScripts, toTwee } from '../script/compiler.mjs';
 import { parseTwee, wrapCode } from './twee.mjs';
 import { loadStoryFormat, compileHtml } from './html.mjs';
 import { loadDeps, saveDeps, recordDeps } from '../lib/deps.mjs';
+import { readYaml } from '../lib/yaml.mjs';
 
 export class BuildError extends Error {
   constructor(errors) {
@@ -29,6 +30,28 @@ export async function loadModuleType(type) {
   }
   const impl = await import(pathToFileURL(path.join(dir, 'module.mjs')).href);
   return { dir, impl };
+}
+
+/**
+ * Approved media for the build. Reads assets/manifest.yaml directly (no dependency on the assets module).
+ * @returns {{files: Object<string,string>, urls: Object<string,string>, referenced: string[], missing: string[]}}
+ *   files: "kind:id" -> project-relative source; urls: "kind:id" -> URL relative to the built index.html
+ */
+export function collectMedia(root, results) {
+  const manifest = readYaml(path.join(root, 'assets', 'manifest.yaml'), root) || { assets: [] };
+  const files = {};
+  const urls = {};
+  for (const a of manifest.assets || []) {
+    const f = a.approved?.file;
+    if (!f || !fs.existsSync(path.join(root, f))) continue;
+    const k = `${a.kind}:${a.id}`;
+    files[k] = f;
+    urls[k] = `media/${a.kind}/${path.basename(f)}`;
+  }
+  const referenced = [...new Set(results.flatMap((r) => r.refs.media)
+    .filter((m) => !((m.kind === 'music' || m.kind === 'ambience') && m.args[0] === 'none'))
+    .map((m) => `${m.kind}:${m.kind === 'portrait' ? `${m.args[0]}.${m.args[1] || 'neutral'}` : m.args[0]}`))].sort();
+  return { files, urls, referenced, missing: referenced.filter((k) => !files[k]) };
 }
 
 /** Compile and validate all scripts. */
@@ -126,7 +149,11 @@ export async function build(root, { modes = ['dev', 'release'] } = {}) {
   const ifid = config.ifid;
   const formatVersion = config.format?.version || null;
 
+  vm.vars.set('forge_media', { init: {}, source: 'media runtime' });
   const storyInit = [...vm.vars.entries()].map(([n, v]) => `<<set $${n} to ${JSON.stringify(v.init ?? null)}>>`).join('\n');
+
+  // Media: approved assets from assets/manifest.yaml, and which referenced cues still lack one.
+  const media = collectMedia(root, results);
   writeText(path.join(genEngine, 'story.twee'), [
     GENERATED_TWEE,
     '',
@@ -140,12 +167,14 @@ setup.forge.characters = ${JSON.stringify(characters, null, 2)};
 setup.forge.modules = ${JSON.stringify(vm.modules, null, 2)};
 setup.forge.invariants = ${JSON.stringify(vm.invariants, null, 2)};
 setup.forge.endings = ${JSON.stringify(endings, null, 2)};
+setup.forge.assets = ${JSON.stringify(media.urls, null, 2)};
 setup.forge.build = ${JSON.stringify({ id: buildId, mode, ifid, title, historyMaxStates: config.runtime?.history_max_states || 20 })};
 `;
   const engineDir = path.join(PLUGIN_ROOT, 'engine');
   writeText(path.join(genEngine, 'forge-data.twee'), wrapCode('forge-data.js', ['script'], data('dev')));
   writeText(path.join(genEngine, 'core.twee'), [
     wrapCode('forge-core.js', ['script'], readText(path.join(engineDir, 'core.js'))),
+    wrapCode('forge-media.js', ['script'], readText(path.join(engineDir, 'media.js'))),
     wrapCode('forge-core.css', ['stylesheet'], readText(path.join(engineDir, 'core.css'))),
     readText(path.join(engineDir, 'widgets.twee')),
   ].join('\n'));
@@ -203,8 +232,16 @@ setup.forge.build = ${JSON.stringify({ id: buildId, mode, ifid, title, historyMa
     const html = compileHtml({ passages, format, title, ifid, start });
     const out = path.join(paths.build, mode, 'index.html');
     writeText(out, html);
+    rmrf(path.join(paths.build, mode, 'media'));
+    let mediaBytes = 0;
+    for (const [k, rel] of Object.entries(media.files)) {
+      const dest = path.join(paths.build, mode, media.urls[k]);
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.copyFileSync(path.join(root, rel), dest);
+      mediaBytes += fs.statSync(dest).size;
+    }
     writeText(path.join(paths.build, mode, 'story.twee'), toTwee(passages.map((p) => ({ ...p, position: p.meta?.position }))));
-    outputs[mode] = { html: rel(root, out), bytes: Buffer.byteLength(html), passages: passages.length };
+    outputs[mode] = { html: rel(root, out), bytes: Buffer.byteLength(html), passages: passages.length, mediaFiles: Object.keys(media.files).length, mediaBytes };
   }
 
   // 7. Manifest + info
@@ -228,6 +265,7 @@ setup.forge.build = ${JSON.stringify({ id: buildId, mode, ifid, title, historyMa
     scripts: files.map((f) => rel(root, f)),
     storyPassages: results.reduce((n, r) => n + r.passages.length, 0),
     endings: endings.map((e) => e.id),
+    media: { referenced: media.referenced.length, available: Object.keys(media.files).length, missing: media.missing },
     outputs,
   };
   writeJson(path.join(paths.build, 'build-info.json'), info);

@@ -1,0 +1,44 @@
+{
+  "id": "ace15-music",
+  "version": 1,
+  "capability": "music",
+  "kinds": ["music"],
+  "status": "tested",
+  "description": "ACE-Step 1.5 turbo (all-in-one checkpoint) for instrumental background music. Output is Opus.",
+  "params": {
+    "checkpoint": { "node": "1", "input": "ckpt_name", "model_folder": "checkpoints", "default": "ace_step_1.5_turbo_aio.safetensors" },
+    "prompt": { "node": "2", "input": "tags", "default": "" },
+    "lyrics": { "node": "2", "input": "lyrics", "default": "[Instrumental]" },
+    "bpm": { "node": "2", "input": "bpm", "default": 90 },
+    "seconds": { "node": "4", "input": "seconds", "default": 60 },
+    "duration": { "node": "2", "input": "duration", "default": 60 },
+    "keyscale": { "node": "2", "input": "keyscale", "default": "A minor" },
+    "music_seed": { "node": "2", "input": "seed", "default": 0 },
+    "seed": { "node": "5", "input": "seed", "default": 0 },
+    "steps": { "node": "5", "input": "steps", "default": 8 },
+    "filename_prefix": { "node": "7", "input": "filename_prefix", "default": "forge/music" }
+  },
+  "outputs": { "type": "audio", "ext": "opus" },
+  "graph": {
+    "1": { "class_type": "CheckpointLoaderSimple", "inputs": { "ckpt_name": "ace_step_1.5_turbo_aio.safetensors" } },
+    "2": {
+      "class_type": "TextEncodeAceStepAudio1.5",
+      "inputs": {
+        "clip": ["1", 1], "tags": "", "lyrics": "[Instrumental]", "seed": 0, "bpm": 90, "duration": 60,
+        "timesignature": "4", "language": "en", "keyscale": "A minor", "generate_audio_codes": true,
+        "cfg_scale": 2, "temperature": 0.85, "top_p": 0.9, "top_k": 0, "min_p": 0
+      }
+    },
+    "3": { "class_type": "ConditioningZeroOut", "inputs": { "conditioning": ["2", 0] } },
+    "4": { "class_type": "EmptyAceStep1.5LatentAudio", "inputs": { "seconds": 60, "batch_size": 1 } },
+    "5": {
+      "class_type": "KSampler",
+      "inputs": {
+        "model": ["1", 0], "seed": 0, "steps": 8, "cfg": 1, "sampler_name": "euler", "scheduler": "simple",
+        "positive": ["2", 0], "negative": ["3", 0], "latent_image": ["4", 0], "denoise": 1
+      }
+    },
+    "6": { "class_type": "VAEDecodeAudio", "inputs": { "samples": ["5", 0], "vae": ["1", 2] } },
+    "7": { "class_type": "SaveAudioOpus", "inputs": { "audio": ["6", 0], "filename_prefix": "forge/music", "quality": "128k" } }
+  }
+}

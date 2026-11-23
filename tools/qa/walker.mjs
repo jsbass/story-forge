@@ -40,7 +40,10 @@ const READ_STATE = () => {
 
 const SAVE_ROUNDTRIP = async () => {
   const S = window.SugarCube;
-  const snap = () => JSON.stringify({ p: S.State.passage, v: S.State.variables });
+  // Key-order-independent snapshot: SugarCube's save format may reorder object keys.
+  const stable = (x) => Array.isArray(x) ? x.map(stable)
+    : x && typeof x === 'object' ? Object.keys(x).sort().reduce((o, k) => { o[k] = stable(x[k]); return o; }, {}) : x;
+  const snap = () => JSON.stringify(stable({ p: S.State.passage, v: S.State.variables }));
   const before = snap();
   let size = null;
   try {

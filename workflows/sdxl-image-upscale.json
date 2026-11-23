@@ -1,0 +1,43 @@
+{
+  "id": "sdxl-image-upscale",
+  "version": 1,
+  "capability": "upscale",
+  "kinds": ["bg", "ui"],
+  "status": "tested",
+  "description": "SDXL text-to-image followed by a 4x model upscale, scaled to the final size (default 2x). For sharp full-screen backgrounds.",
+  "params": {
+    "checkpoint": { "node": "1", "input": "ckpt_name", "model_folder": "checkpoints", "any_model": true },
+    "prompt": { "node": "2", "input": "text", "default": "" },
+    "negative": { "node": "3", "input": "text", "default": "lowres, blurry, watermark, signature, text, jpeg artifacts, deformed" },
+    "width": { "node": "4", "input": "width", "default": 1344 },
+    "height": { "node": "4", "input": "height", "default": 768 },
+    "seed": { "node": "5", "input": "seed", "default": 0 },
+    "steps": { "node": "5", "input": "steps", "default": 28 },
+    "cfg": { "node": "5", "input": "cfg", "default": 6 },
+    "sampler": { "node": "5", "input": "sampler_name", "default": "dpmpp_2m" },
+    "scheduler": { "node": "5", "input": "scheduler", "default": "karras" },
+    "upscale_model": { "node": "8", "input": "model_name", "model_folder": "upscale_models", "default": "4x-UltraSharp.pth" },
+    "out_width": { "node": "10", "input": "width", "default": 2688 },
+    "out_height": { "node": "10", "input": "height", "default": 1536 },
+    "filename_prefix": { "node": "7", "input": "filename_prefix", "default": "forge/img" }
+  },
+  "outputs": { "type": "image", "ext": "png" },
+  "graph": {
+    "1": { "class_type": "CheckpointLoaderSimple", "inputs": { "ckpt_name": "" } },
+    "2": { "class_type": "CLIPTextEncode", "inputs": { "text": "", "clip": ["1", 1] } },
+    "3": { "class_type": "CLIPTextEncode", "inputs": { "text": "", "clip": ["1", 1] } },
+    "4": { "class_type": "EmptyLatentImage", "inputs": { "width": 1344, "height": 768, "batch_size": 1 } },
+    "5": {
+      "class_type": "KSampler",
+      "inputs": {
+        "model": ["1", 0], "seed": 0, "steps": 28, "cfg": 6, "sampler_name": "dpmpp_2m", "scheduler": "karras",
+        "positive": ["2", 0], "negative": ["3", 0], "latent_image": ["4", 0], "denoise": 1
+      }
+    },
+    "6": { "class_type": "VAEDecode", "inputs": { "samples": ["5", 0], "vae": ["1", 2] } },
+    "8": { "class_type": "UpscaleModelLoader", "inputs": { "model_name": "4x-UltraSharp.pth" } },
+    "9": { "class_type": "ImageUpscaleWithModel", "inputs": { "upscale_model": ["8", 0], "image": ["6", 0] } },
+    "10": { "class_type": "ImageScale", "inputs": { "image": ["9", 0], "upscale_method": "area", "width": 2688, "height": 1536, "crop": "disabled" } },
+    "7": { "class_type": "SaveImage", "inputs": { "images": ["10", 0], "filename_prefix": "forge/img" } }
+  }
+}

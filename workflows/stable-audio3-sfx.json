@@ -1,0 +1,37 @@
+{
+  "id": "stable-audio3-sfx",
+  "version": 1,
+  "capability": "sfx",
+  "kinds": ["sfx", "ambience", "music"],
+  "status": "tested",
+  "description": "Stable Audio 3 Medium (T5Gemma text encoder) for sound effects and ambience; also usable for music. Based on ComfyUI's audio_stable_audio_3_medium template, without the optional Qwen re-prompting step. Output is stereo 48 kHz Opus. Tested on an RTX 3070 8 GB: 12 s clip in ~10 s with the model cold, 8 s clip in ~3 s warm. The T5Gemma encoder must be in Models/TextEncoders.",
+  "prompt_template": "{prompt} Length: {seconds} seconds",
+  "params": {
+    "checkpoint": { "node": "1", "input": "ckpt_name", "model_folder": "checkpoints", "default": "stable_audio_3_medium.safetensors" },
+    "text_encoder": { "node": "2", "input": "clip_name", "model_folder": "text_encoders", "default": "t5gemma_b_b_ul2.safetensors" },
+    "prompt": { "node": "3", "input": "text", "default": "" },
+    "negative": { "node": "4", "input": "text", "default": "" },
+    "seconds": { "node": "5", "input": "seconds", "default": 6 },
+    "seed": { "node": "6", "input": "seed", "default": 0 },
+    "steps": { "node": "6", "input": "steps", "default": 8 },
+    "cfg": { "node": "6", "input": "cfg", "default": 1 },
+    "filename_prefix": { "node": "8", "input": "filename_prefix", "default": "forge/sfx" }
+  },
+  "outputs": { "type": "audio", "ext": "opus" },
+  "graph": {
+    "1": { "class_type": "CheckpointLoaderSimple", "inputs": { "ckpt_name": "stable_audio_3_medium.safetensors" } },
+    "2": { "class_type": "CLIPLoader", "inputs": { "clip_name": "t5gemma_b_b_ul2.safetensors", "type": "stable_audio", "device": "default" } },
+    "3": { "class_type": "CLIPTextEncode", "inputs": { "text": "", "clip": ["2", 0] } },
+    "4": { "class_type": "CLIPTextEncode", "inputs": { "text": "", "clip": ["2", 0] } },
+    "5": { "class_type": "EmptyLatentAudio", "inputs": { "seconds": 6, "batch_size": 1 } },
+    "6": {
+      "class_type": "KSampler",
+      "inputs": {
+        "model": ["1", 0], "seed": 0, "steps": 8, "cfg": 1, "sampler_name": "lcm", "scheduler": "simple",
+        "positive": ["3", 0], "negative": ["4", 0], "latent_image": ["5", 0], "denoise": 1
+      }
+    },
+    "7": { "class_type": "VAEDecodeAudio", "inputs": { "samples": ["6", 0], "vae": ["1", 2] } },
+    "8": { "class_type": "SaveAudioOpus", "inputs": { "audio": ["7", 0], "filename_prefix": "forge/sfx", "quality": "128k" } }
+  }
+}

@@ -11,6 +11,7 @@ export const STAGES = [
   { id: 'characters', label: 'Character bios', owner: 'character-designer', artifacts: ['characters/'] },
   { id: 'loops', label: 'Game loop design', owner: 'loop-designer', artifacts: ['design/loops/'] },
   { id: 'script', label: 'Script / dialog', owner: 'dialog-writer', artifacts: ['script/'] },
+  { id: 'assets', label: 'Assets (ComfyUI)', owner: 'asset-generator', artifacts: ['assets/manifest.yaml'] },
   { id: 'build', label: 'Build (SugarCube)', owner: 'game-builder', artifacts: ['src/'] },
   { id: 'qa', label: 'QA (functional + character)', owner: 'qa-functional, qa-character', artifacts: ['qa/reports/'] },
   { id: 'playtest', label: 'Playtest sign-off', owner: 'you', artifacts: [] },

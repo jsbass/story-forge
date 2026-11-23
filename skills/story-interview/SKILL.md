@@ -24,10 +24,11 @@ You interview the user directly; don't delegate this to a subagent. The goal is 
 4. **World and tone:** genre, three tone adjectives, the setting, and the themes to explore.
 5. **Characters:** who the user already imagines. Sketches are fine, because the Character Designer develops them later.
 6. **Game loops:** which loops they want (stats/relationships, inventory and puzzles, minigames, exploration/time, or something else) and what each should make the player feel. Say that loops can be added later with `/forge:add-loop`.
-7. **Presentation (recorded now, produced in Phase 2):** art style direction, audio mood, voice-over on or off (written to `forge.yaml voice_over`), a style profile to reuse, and the distribution targets.
+7. **Presentation:** audio mood, voice-over on or off (written to `forge.yaml voice_over`), a style profile to reuse, and the distribution targets.
+8. **Art direction:** run the `art-direction` skill. It checks the platform, proposes styles with quick samples, picks or installs models (only with the user's approval), and records `forge.yaml art`.
 
 ## Finish
 1. Write `design/interview.md` with every section filled in or marked "n/a", using the user's own phrasing where you can.
-2. Update `forge.yaml`: `size`, `rating.target`, `rating.avoid` and `voice_over`. Edit the existing keys rather than rewriting the file.
+2. Update `forge.yaml`: `size`, `rating.target`, `rating.avoid`, `voice_over` and `art`. Edit the existing keys rather than rewriting the file.
 3. `node .forge/forge.mjs stage submit interview`
 4. Run the gate: summarise the concept in about 8 lines and ask the user to approve it or request changes.

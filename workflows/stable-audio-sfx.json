@@ -1,0 +1,38 @@
+{
+  "id": "stable-audio-sfx",
+  "version": 1,
+  "capability": "sfx",
+  "kinds": ["sfx", "ambience"],
+  "status": "untested",
+  "description": "Stable Audio Open 1.0 for sound effects and ambience loops (up to 47 s). Output is Opus.",
+  "params": {
+    "checkpoint": { "node": "1", "input": "ckpt_name", "model_folder": "checkpoints", "default": "stable-audio-open-1.0.safetensors" },
+    "text_encoder": { "node": "2", "input": "clip_name", "model_folder": "text_encoders", "default": "t5_base.safetensors" },
+    "prompt": { "node": "3", "input": "text", "default": "" },
+    "negative": { "node": "4", "input": "text", "default": "low quality, distorted, music, speech" },
+    "seconds": { "node": "6", "input": "seconds", "default": 8 },
+    "seconds_total": { "node": "5", "input": "seconds_total", "default": 8 },
+    "seed": { "node": "7", "input": "seed", "default": 0 },
+    "steps": { "node": "7", "input": "steps", "default": 50 },
+    "cfg": { "node": "7", "input": "cfg", "default": 5 },
+    "filename_prefix": { "node": "9", "input": "filename_prefix", "default": "forge/sfx" }
+  },
+  "outputs": { "type": "audio", "ext": "opus" },
+  "graph": {
+    "1": { "class_type": "CheckpointLoaderSimple", "inputs": { "ckpt_name": "stable-audio-open-1.0.safetensors" } },
+    "2": { "class_type": "CLIPLoader", "inputs": { "clip_name": "t5_base.safetensors", "type": "stable_audio" } },
+    "3": { "class_type": "CLIPTextEncode", "inputs": { "text": "", "clip": ["2", 0] } },
+    "4": { "class_type": "CLIPTextEncode", "inputs": { "text": "", "clip": ["2", 0] } },
+    "5": { "class_type": "ConditioningStableAudio", "inputs": { "positive": ["3", 0], "negative": ["4", 0], "seconds_start": 0, "seconds_total": 8 } },
+    "6": { "class_type": "EmptyLatentAudio", "inputs": { "seconds": 8, "batch_size": 1 } },
+    "7": {
+      "class_type": "KSampler",
+      "inputs": {
+        "model": ["1", 0], "seed": 0, "steps": 50, "cfg": 5, "sampler_name": "dpmpp_3m_sde_gpu", "scheduler": "exponential",
+        "positive": ["5", 0], "negative": ["5", 1], "latent_image": ["6", 0], "denoise": 1
+      }
+    },
+    "8": { "class_type": "VAEDecodeAudio", "inputs": { "samples": ["7", 0], "vae": ["1", 2] } },
+    "9": { "class_type": "SaveAudioOpus", "inputs": { "audio": ["8", 0], "filename_prefix": "forge/sfx", "quality": "128k" } }
+  }
+}

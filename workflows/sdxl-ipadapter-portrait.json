@@ -1,0 +1,46 @@
+{
+  "id": "sdxl-ipadapter-portrait",
+  "version": 1,
+  "capability": "char_consistency",
+  "kinds": ["portrait"],
+  "status": "tested",
+  "description": "SDXL portrait guided by an approved reference image of the character (IP-Adapter Plus), so the face and outfit stay consistent across expressions.",
+  "requires": { "node_pack": "ComfyUI_IPAdapter_plus" },
+  "params": {
+    "checkpoint": { "node": "1", "input": "ckpt_name", "model_folder": "checkpoints", "any_model": true },
+    "prompt": { "node": "2", "input": "text", "default": "" },
+    "negative": { "node": "3", "input": "text", "default": "lowres, blurry, watermark, signature, text, jpeg artifacts, deformed" },
+    "width": { "node": "4", "input": "width", "default": 832 },
+    "height": { "node": "4", "input": "height", "default": 1216 },
+    "seed": { "node": "5", "input": "seed", "default": 0 },
+    "steps": { "node": "5", "input": "steps", "default": 28 },
+    "cfg": { "node": "5", "input": "cfg", "default": 6 },
+    "sampler": { "node": "5", "input": "sampler_name", "default": "dpmpp_2m" },
+    "scheduler": { "node": "5", "input": "scheduler", "default": "karras" },
+    "ref_image": { "node": "11", "input": "image", "default": "", "upload": true },
+    "ref_weight": { "node": "12", "input": "weight", "default": 0.75 },
+    "filename_prefix": { "node": "7", "input": "filename_prefix", "default": "forge/portrait" }
+  },
+  "outputs": { "type": "image", "ext": "png" },
+  "graph": {
+    "1": { "class_type": "CheckpointLoaderSimple", "inputs": { "ckpt_name": "" } },
+    "10": { "class_type": "IPAdapterUnifiedLoader", "inputs": { "model": ["1", 0], "preset": "PLUS (high strength)" } },
+    "11": { "class_type": "LoadImage", "inputs": { "image": "" } },
+    "12": {
+      "class_type": "IPAdapter",
+      "inputs": { "model": ["10", 0], "ipadapter": ["10", 1], "image": ["11", 0], "weight": 0.75, "start_at": 0, "end_at": 1, "weight_type": "standard" }
+    },
+    "2": { "class_type": "CLIPTextEncode", "inputs": { "text": "", "clip": ["1", 1] } },
+    "3": { "class_type": "CLIPTextEncode", "inputs": { "text": "", "clip": ["1", 1] } },
+    "4": { "class_type": "EmptyLatentImage", "inputs": { "width": 832, "height": 1216, "batch_size": 1 } },
+    "5": {
+      "class_type": "KSampler",
+      "inputs": {
+        "model": ["12", 0], "seed": 0, "steps": 28, "cfg": 6, "sampler_name": "dpmpp_2m", "scheduler": "karras",
+        "positive": ["2", 0], "negative": ["3", 0], "latent_image": ["4", 0], "denoise": 1
+      }
+    },
+    "6": { "class_type": "VAEDecode", "inputs": { "samples": ["5", 0], "vae": ["1", 2] } },
+    "7": { "class_type": "SaveImage", "inputs": { "images": ["6", 0], "filename_prefix": "forge/portrait" } }
+  }
+}

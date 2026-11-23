@@ -27,12 +27,21 @@ rating:
 voice_over: false
 distribution: [itch, single-html, web, desktop]
 style_profile: null
+art:                   # chosen in the Art Direction step of the interview
+  style: null          # e.g. "painterly dark fantasy"
+  checkpoint: null     # ComfyUI checkpoint file used for images
+  prompt_prefix: ""    # added before every image prompt (style words, LoRA trigger words)
+  negative: ""         # added to every negative prompt
+  defaults: {}         # per-kind overrides, e.g. bg: { workflow: sdxl-image-upscale }
+comfyui:
+  url: http://127.0.0.1:8188
 gates:                 # stages that pause for your approval (all on by default)
   interview: true
   bible: true
   characters: true
   loops: true
   script: true
+  assets: true
   build: true
   qa: true
   playtest: true
@@ -50,6 +59,8 @@ const GITIGNORE = `node_modules/
 build/
 qa/playthroughs/
 assets/raw/
+assets/review/
+assets/lora/
 `;
 
 /** Create a new game project folder. Does not install anything (see setupProject). */

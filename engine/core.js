@@ -11,13 +11,15 @@
 
   Config.history.maxStates = (F.build && F.build.historyMaxStates) || 20;
 
-  /* Media hook. Phase 1 records requests; the Phase 2 asset runtime renders them. */
+  /* Media hook: records the cue, then lets the media runtime (media.js) render it.
+     Returns inline HTML for cues that appear in the text (portraits, video, dev chips). */
   F.media = function (args) {
     args = Array.prototype.slice.call(args);
     var entry = { kind: args[0], args: args.slice(1), passage: State.passage };
     F.mediaLog.push(entry);
     document.documentElement.setAttribute('data-forge-' + entry.kind, entry.args.join(' '));
     $(document).trigger({ type: ':forge-media', forge: entry });
+    return F.mediaRender ? F.mediaRender(entry) || '' : '';
   };
 
   F.reachedEnding = function (id) {

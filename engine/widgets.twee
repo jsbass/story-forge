@@ -1,7 +1,7 @@
 :: forge-widgets [widget nobr]
 <<widget "forge_scene">><<run setup.forge.scene = _args[0]>><</widget>>
 <<widget "forge_say" container>><<set _fc to setup.forge.characters[_args[0]] || { name: _args[0] }>><div class="forge-line" @data-speaker="_args[0]"><span class="forge-speaker" @style="'--forge-speaker-color:' + (_fc.color || 'inherit')"><<= _fc.name>></span><<if _args[1]>><span class="forge-paren">(<<= _args[1]>>)</span><</if>><span class="forge-text">_contents</span></div><</widget>>
-<<widget "forge_media">><<run setup.forge.media(_args)>><</widget>>
+<<widget "forge_media">><<set _fm to setup.forge.media(_args)>><<if _fm>><<= _fm>><</if>><</widget>>
 <<widget "forge_ending">><div class="forge-ending"><div class="forge-ending-label">Ending</div><h2 class="forge-ending-title"><<= _args[1]>></h2><<link "Play again">><<run Engine.restart()>><</link>></div><<run setup.forge.reachedEnding(_args[0])>><</widget>>
 
 :: StoryCaption [nobr]

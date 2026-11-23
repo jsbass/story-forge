@@ -2,7 +2,28 @@
 
 A Claude Code plugin that turns a game idea into a playable, tested **Twine (SugarCube 2)** game. Role-specific agents do the work, and you approve each stage at a gate. The full design is in [docs/SPEC.md](docs/SPEC.md).
 
-**Status: Phase 1 (narrative core).** This phase produces a text-only game end to end: interview, story bible, characters, game loops, script, build, then QA and playtest. Assets (ComfyUI), optimization and packaging come in Phases 2–3.
+**Status: Phases 1–2.**
+- **Phase 1, the narrative core:** a text-only game end to end. Interview, story bible, characters, game loops, script, build, then QA and playtest.
+- **Phase 2, assets:**
+  - a platform assessment of the GPU and ComfyUI
+  - model installs through Stability Matrix, each needing your approval
+  - generation with a local ComfyUI, and a review gallery
+  - backgrounds, portraits, audio and video in the game
+
+Optimization and packaging come in Phase 3.
+
+Phase 2 needs ComfyUI running (by default at `http://127.0.0.1:8188`). These workflows have been tested live on an RTX 3070 (8 GB):
+
+| Workflow | Time per run |
+|---|---|
+| SDXL images | ~15–21 s |
+| SDXL drafts | ~2 s once loaded |
+| Upscale | ~30 s |
+| IP-Adapter portrait | ~26 s |
+| ACE-Step 1.5 music, 30 s track | ~14 s |
+| Wan 2.2 video, 2 s at 480p | ~87 s |
+
+The Stable Audio sound-effects workflow is still `untested`: its model is gated on Hugging Face and has to be downloaded manually. Voice-over has no workflow yet.
 
 ## Install
 
@@ -24,6 +45,9 @@ The commands are namespaced `/forge:*`.
 | `/forge:add-loop` | Adds a gameplay loop mid-project |
 | `/forge:build` · `/forge:playtest` · `/forge:qa` | Builds the game, plays it with the ⚙ debug overlay, or runs QA |
 | `/forge:rollback <stage>` | Restores a previously approved version of a stage |
+| `/forge:assess` | Shows what this machine can generate and the upgrade options |
+| `/forge:assets [kind]` | Generates a batch of assets and opens the review gallery |
+| `/forge:upgrade-assets` | Installs approved models mid-project, then unblocks or regenerates assets |
 
 `/forge:new` installs the following **into the game project**. The plugin itself has no install step.
 - `yaml` and `playwright` from npm
@@ -34,15 +58,18 @@ The commands are namespaced `/forge:*`.
 
 | Path | Contents |
 |---|---|
-| `agents/` | Role subagents: story-planner, engine-advisor, character-designer, loop-designer, dialog-writer, game-builder, qa-functional, qa-character |
-| `skills/` | `forge-orchestrator` (runs the pipeline), `story-interview`, `loop-design`, `forge-script` (the dialog format reference) |
+| `agents/` | Role subagents: story-planner, engine-advisor, character-designer, loop-designer, dialog-writer, asset-generator, game-builder, qa-functional, qa-character |
+| `skills/` | `forge-orchestrator` (runs the pipeline), `story-interview`, `art-direction`, `loop-design`, `forge-script` (the dialog format reference) |
 | `commands/` | The `/forge:*` slash commands |
 | `tools/forge.mjs` | The CLI the agents use, run as `node .forge/forge.mjs <cmd>` inside a project |
 | `tools/script/` | The Forge Script parser and its deterministic compiler to Twee |
 | `tools/build/` | The Twee → Twine 2 HTML compiler, the builder, and the playtest server |
 | `tools/qa/` | Static analysis, Playwright playthroughs, and the knowledge-timeline check |
 | `tools/lib/` | Pipeline state and gates, the dependency graph and impact analysis, the feedback log, git |
-| `engine/` | The SugarCube runtime: widgets, settings, the debug overlay |
+| `tools/assets/` | The ComfyUI client, workflow library, platform assessor, model installer (Stability Matrix and Civitai), asset manifest, generation queue, and review gallery |
+| `workflows/` | Built-in ComfyUI workflows: SDXL images and drafts, upscaling, IP-Adapter portraits, Stable Audio, ACE-Step 1.5, Wan 2.2 |
+| `assets-catalog.json` | Models the assessor may propose, with verified sources and checksums |
+| `engine/` | The SugarCube runtime: widgets, settings, media playback, the debug overlay |
 | `modules/stats/` | The first loop module: clamped meters, a sidebar and toasts |
 | `templates/` | Starter files for each stage (`forge template <name>`) |
 | `examples/lantern-keeper/` | A tiny complete game used for end-to-end testing |

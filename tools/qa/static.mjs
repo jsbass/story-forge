@@ -156,7 +156,8 @@ export function analyzeStatic({ passages, start, expectedEndings = [], expectedS
     if (!assigned.has(name)) add('S2', 'undefined-variable', readWhere.get(name), `$${name} is read but never set or declared in StoryInit`);
   }
   for (const name of assigned) {
-    if (!read.has(name)) add('S4', 'unused-variable', null, `$${name} is set but never read`);
+    // forge_* variables belong to the runtime (e.g. $forge_media) and are read from JS.
+    if (!read.has(name) && !name.startsWith('forge_')) add('S4', 'unused-variable', null, `$${name} is set but never read`);
   }
 
   const order = { S1: 0, S2: 1, S3: 2, S4: 3 };
