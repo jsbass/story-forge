@@ -1,0 +1,12 @@
+{
+  "id": "comfyui",
+  "kind": "assets",
+  "version": 1,
+  "label": "ComfyUI (local, e.g. under Stability Matrix) - images, sfx, music, video",
+  "description": "Generates assets through a local ComfyUI. Copies the tested workflow library and the model catalog into forge/assets/ and adds the comfyui: block to forge.yaml. Models stay in the shared ComfyUI/Stability Matrix models folder; `forge assess` writes forge/assets/models.lock.json with the exact files this project uses. Nothing is downloaded at install time.",
+  "copy": {
+    "workflows": "forge/assets/workflows",
+    "catalog.json": "forge/assets/catalog.json"
+  },
+  "setup": []
+}

@@ -1,0 +1,16 @@
+{
+  "id": "sugarcube",
+  "kind": "engine",
+  "version": 1,
+  "label": "SugarCube 2 (Twine) - web build, Playwright QA, web/itch/desktop packaging",
+  "description": "Builds the game as a SugarCube 2 Twine story. Copies the Forge runtime (engine/runtime) and the loop modules (engine/modules) into forge/engine/, adds the build, QA, optimize and packaging settings to forge.yaml, and installs Playwright + Chromium and the SugarCube 2 story format into the project.",
+  "copy": {
+    "runtime": "forge/engine/runtime",
+    "modules": "forge/engine/modules"
+  },
+  "setup": [
+    { "step": "npm", "packages": ["playwright@^1"], "approx_mb": 10, "why": "automated playthroughs, performance QA and WebP encoding (npm package)" },
+    { "step": "playwright-chromium", "approx_mb": 150, "why": "the headless Chromium browser Playwright drives" },
+    { "step": "sugarcube-format", "approx_mb": 1, "why": "the SugarCube 2 story format (latest release from github.com/tmedwards/sugarcube-2) into vendor/sugarcube-2/" }
+  ]
+}

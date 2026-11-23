@@ -1,3 +1,6 @@
 node_modules/
 .forge-test-*/
 *.log
+
+# The example project is its own git repository
+example/

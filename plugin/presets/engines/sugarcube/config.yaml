@@ -1,0 +1,24 @@
+# --- added by the sugarcube engine pack ---
+format:
+  name: SugarCube
+  version: null        # filled in when the story format is installed (vendor/sugarcube-2)
+distribution: [itch, single-html, web, desktop]
+distribution_settings:
+  single_html_max_mb: 25   # the single-HTML target fails above this (unless --force)
+  desktop:
+    platforms: [win32]     # also: darwin, linux (Electron, built on this machine, unsigned)
+    arch: x64
+  itch:
+    project: null          # "yourname/your-game" for butler push
+    channel: html5
+optimize:                  # perf-optimizer settings (defaults shown)
+  images: { format: webp, quality: 82, max: { bg: 1920, portrait: 768, ui: 1024 }, small: { bg: 960, portrait: 640 } }
+  video_posters: true
+  audio_bitrate: { music: 96k, ambience: 64k, sfx: 64k, voice: 48k }   # applied only if ffmpeg is found
+  ffmpeg: null
+performance:               # qa-performance budgets
+  budgets: { first_passage_ms: 2000, transition_ms: 100, html_kb: 2048, save_kb: 100, heap_growth_mb: 20, total_mb: 100 }
+  mobile: { cpu_slowdown: 4, download_kbps: 9000, upload_kbps: 1500, latency_ms: 150 }
+  long_session: 500
+runtime:
+  history_max_states: 20
