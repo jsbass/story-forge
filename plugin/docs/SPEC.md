@@ -1,8 +1,8 @@
-# Twine Game Forge — Specification (Draft v0.1)
+# Story Forge — Specification (Draft v0.1)
 
-A Claude Code plugin that turns a game idea into a playable, tested Twine (SugarCube 2) game. A team of role-specific agents does the work, and the user approves each stage.
+A Claude Code plugin that turns a game idea into a playable, tested narrative game. The first engine is Twine (SugarCube 2); other engines plug in through adapters and preset packs. A team of role-specific agents does the work, and the user approves each stage.
 
-> Working name: **Twine Forge**. Command prefix: `/forge:`.
+> Working name: **Story Forge**. Command prefix: `/forge:`.
 
 ---
 

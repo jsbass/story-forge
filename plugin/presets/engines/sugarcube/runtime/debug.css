@@ -1,4 +1,4 @@
-/* Twine Forge - dev-build debug overlay */
+/* Story Forge - dev-build debug overlay */
 #forge-debug-toggle {
   position: fixed; right: 12px; bottom: 12px; z-index: 2000; width: 40px; height: 40px;
   border-radius: 50%; border: 1px solid #888; background: #222; color: #eee; font-size: 20px; cursor: pointer;

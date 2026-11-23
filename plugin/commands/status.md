@@ -1,5 +1,5 @@
 ---
-description: Show the Twine Forge pipeline status, stale work and open feedback
+description: Show the Story Forge pipeline status, stale work and open feedback
 ---
 
 Run `node .forge/forge.mjs status` from the project root and summarise it for the user:

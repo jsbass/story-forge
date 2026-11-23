@@ -1,9 +1,9 @@
 ---
-description: Create a new Twine Forge game project and start the concept interview
+description: Create a new Story Forge game project and start the concept interview
 argument-hint: <folder> [title]
 ---
 
-Create a new Twine Forge game project: $ARGUMENTS
+Create a new Story Forge game project: $ARGUMENTS
 
 1. Work out the target folder and title from the arguments. If either is missing, ask. Prefer a new folder next to the user's other projects.
 2. Tell the user what creating a project does, and ask them to confirm:

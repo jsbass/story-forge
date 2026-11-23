@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Twine Forge CLI. Run from inside a game project: node .forge/forge.mjs <command>
+// Story Forge CLI. Run from inside a game project: node .forge/forge.mjs <command>
 import fs from 'node:fs';
 import path from 'node:path';
 import { requireProjectRoot, findProjectRoot, loadProject, PLUGIN_ROOT } from './lib/project.mjs';
@@ -19,7 +19,7 @@ import { listStyles, getStyle, applyStyle, saveStyle, readPart, PROJECT_FILES, u
 import { optimize, formatOptimize } from './release/optimize.mjs';
 import { packageGame, formatRelease, butlerPush, distributionSettings } from './release/package.mjs';
 
-const HELP = `Twine Forge CLI
+const HELP = `Story Forge CLI
 
 Project
   new <dir> --title "Title" [--no-setup] [--assets comfyui|none]   create a game project: forge.yaml, role playbooks
@@ -64,7 +64,7 @@ Release (engine pack)
   loops [types]                       the project's loop modules, or every module type the engine pack installed
 
 Engine
-  engine list                         engines the Engine Advisor knows, and which Twine Forge can build
+  engine list                         engines the Engine Advisor knows, and which Story Forge can build
   engine check [--json]               what the design needs vs. each engine (blockers, risks, recommendation)
   engine set <name> [--rationale ..] [--risks a,b] --yes   record the decision and install the engine pack, which
                                       downloads its tools into the project (see: pack plan <name>) - after approval

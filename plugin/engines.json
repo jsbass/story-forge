@@ -1,5 +1,5 @@
 {
-  "comment": "Engines the Engine Advisor knows about. 'forge_support' is what Twine Forge can build today: supported (has an adapter in tools/engines/), planned, or not-planned. Feature fit: yes | partial | no.",
+  "comment": "Engines the Engine Advisor knows about. 'forge_support' is what Story Forge can build today: supported (has an adapter in tools/engines/), planned, or not-planned. Feature fit: yes | partial | no.",
   "features": {
     "branching_text": "Branching hypertext with choices",
     "stats": "Numeric meters / relationships",
@@ -24,7 +24,7 @@
     "sugarcube": {
       "label": "SugarCube 2 (Twine)",
       "forge_support": "supported",
-      "summary": "Browser hypertext with a full macro language and JavaScript; Twine Forge's default.",
+      "summary": "Browser hypertext with a full macro language and JavaScript; Story Forge's default.",
       "fit": {
         "branching_text": "yes", "stats": "yes", "inventory": "yes", "turn_based_minigames": "yes", "hub_map": "yes",
         "realtime_timers": "partial", "realtime_action": "partial", "physics": "no", "free_movement": "no", "3d": "no",
@@ -35,7 +35,7 @@
         "realtime_action": "Possible as a small canvas/JS widget inside a passage; keep it short and turn-based where you can.",
         "sprites_layered": "Portraits and backgrounds are built in; full VN staging needs custom CSS/JS.",
         "large_story": "One HTML file holds every passage; past ~1,500 passages load time and editing suffer.",
-        "mobile_app": "Via a web wrapper (e.g. Capacitor) - not built by Twine Forge."
+        "mobile_app": "Via a web wrapper (e.g. Capacitor) - not built by Story Forge."
       }
     },
     "harlowe": {
@@ -86,7 +86,7 @@
         "multiplayer": "yes", "sprites_layered": "yes", "voice_over": "yes", "video": "yes", "large_story": "partial",
         "web": "partial", "desktop": "yes", "mobile_app": "yes"
       },
-      "notes": { "branching_text": "Needs a dialogue plugin or ink; Twine Forge's script pipeline doesn't target it." }
+      "notes": { "branching_text": "Needs a dialogue plugin or ink; Story Forge's script pipeline doesn't target it." }
     }
   }
 }

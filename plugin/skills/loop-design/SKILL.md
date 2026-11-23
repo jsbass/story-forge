@@ -1,6 +1,6 @@
 ---
 name: loop-design
-description: Runs the Twine Forge game-loop design conversation with the user (stage 4, or /forge:add-loop mid-project), then hands the decisions to the loop-designer agent. Use when choosing, adding, rebalancing or removing gameplay loops in a Forge project.
+description: Runs the Story Forge game-loop design conversation with the user (stage 4, or /forge:add-loop mid-project), then hands the decisions to the loop-designer agent. Use when choosing, adding, rebalancing or removing gameplay loops in a Forge project.
 ---
 
 # Loop design conversation

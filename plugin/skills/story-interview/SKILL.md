@@ -1,6 +1,6 @@
 ---
 name: story-interview
-description: Runs the Twine Forge concept interview with the user (stage 1) and records it in design/interview.md. Use at the start of a new Forge project (/forge:new) or when the user wants to rework the core concept.
+description: Runs the Story Forge concept interview with the user (stage 1) and records it in design/interview.md. Use at the start of a new Forge project (/forge:new) or when the user wants to rework the core concept.
 ---
 
 # Concept interview

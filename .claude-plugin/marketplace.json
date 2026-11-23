@@ -1,11 +1,11 @@
 {
-  "name": "twine-forge",
-  "owner": { "name": "Twine Forge" },
+  "name": "story-forge",
+  "owner": { "name": "Story Forge" },
   "plugins": [
     {
       "name": "forge",
       "source": "./plugin",
-      "description": "Twine Forge: role-based Claude agents that plan, write, build and QA interactive-fiction games, with an approval gate after every stage."
+      "description": "Story Forge: role-based Claude agents that plan, write, build and QA interactive-fiction games, with an approval gate after every stage."
     }
   ]
 }

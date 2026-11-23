@@ -1,4 +1,4 @@
-/* Twine Forge module: inventory (instance __MODULE_ID__) */
+/* Story Forge module: inventory (instance __MODULE_ID__) */
 (function () {
   'use strict';
   var F = setup.forge;

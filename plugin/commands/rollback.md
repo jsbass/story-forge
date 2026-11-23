@@ -1,5 +1,5 @@
 ---
-description: Roll a Twine Forge stage back to a previously approved version
+description: Roll a Story Forge stage back to a previously approved version
 argument-hint: <stage> [version]
 ---
 

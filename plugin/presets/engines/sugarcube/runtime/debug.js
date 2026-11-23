@@ -1,4 +1,4 @@
-/* Twine Forge runtime - dev-build debug overlay (excluded from release builds) */
+/* Story Forge runtime - dev-build debug overlay (excluded from release builds) */
 (function () {
   'use strict';
   var F = (setup.forge = setup.forge || {});

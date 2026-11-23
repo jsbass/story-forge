@@ -1,6 +1,6 @@
 ---
 name: forge-script
-description: Reference for Forge Script, the branching-dialog format (*.script.md) that Twine Forge compiles for the project's engine. Use when writing, editing, reviewing or debugging files in a Forge project's script/ folder, or when a build reports a script error.
+description: Reference for Forge Script, the branching-dialog format (*.script.md) that Story Forge compiles for the project's engine. Use when writing, editing, reviewing or debugging files in a Forge project's script/ folder, or when a build reports a script error.
 ---
 
 # Forge Script

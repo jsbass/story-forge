@@ -1,4 +1,4 @@
-# Twine Forge
+# Story Forge
 
 A Claude Code plugin that turns a game idea into a playable, tested game. Role-specific agents do the work, and you approve each stage at a gate. The full design is in [docs/SPEC.md](docs/SPEC.md).
 
@@ -33,7 +33,7 @@ The Stable Audio Open fallback is still `untested`: its model is gated on Huggin
 ## Install
 
 ```
-claude plugin install <path-to>/twine-forge/plugin     # or add the repo as a marketplace (it has .claude-plugin/marketplace.json)
+claude plugin install <path-to>/story-forge/plugin     # or add the repo as a marketplace (it has .claude-plugin/marketplace.json)
 ```
 
 The commands are namespaced `/forge:*`.

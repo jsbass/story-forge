@@ -135,7 +135,7 @@ export async function optimize(root, { log = console.log } = {}) {
   const info = readJson(path.join(buildDir, 'build-info.json'));
   if (!info?.outputs?.release) throw new Error('No release build. Run: node .forge/forge.mjs build');
   const data = readJson(path.join(buildDir, 'forge-data.json'));
-  if (!data) throw new Error('build/forge-data.json missing - rebuild with this version of Twine Forge (forge build)');
+  if (!data) throw new Error('build/forge-data.json missing - rebuild with this version of Story Forge (forge build)');
 
   const srcDir = path.join(buildDir, 'release');
   const outDir = path.join(buildDir, 'optimized');

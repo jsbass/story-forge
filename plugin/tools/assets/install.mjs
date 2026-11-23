@@ -22,7 +22,7 @@ export async function downloadFile(url, dest, { sha = null, headers = {}, onProg
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   const part = dest + '.part';
   const have = fs.existsSync(part) ? fs.statSync(part).size : 0;
-  const res = await fetch(url, { headers: { 'User-Agent': 'twine-forge', ...(have ? { Range: `bytes=${have}-` } : {}), ...headers }, redirect: 'follow' });
+  const res = await fetch(url, { headers: { 'User-Agent': 'story-forge', ...(have ? { Range: `bytes=${have}-` } : {}), ...headers }, redirect: 'follow' });
   if (res.status === 401 || res.status === 403) {
     const e = new Error(`Download refused (HTTP ${res.status}). The model is gated or needs a login.`);
     e.code = 'AUTH';
@@ -115,7 +115,7 @@ const CIVITAI_TYPE_FOLDER = { Checkpoint: 'StableDiffusion', LORA: 'Lora', Textu
 export async function civitaiSearch(query, { types = 'Checkpoint', baseModels = ['SDXL 1.0', 'Illustrious', 'Pony'], limit = 8 } = {}) {
   const q = new URLSearchParams({ query, types, sort: 'Most Downloaded', nsfw: 'false', limit: String(limit) });
   for (const b of baseModels) q.append('baseModels', b);
-  const res = await fetch(`https://civitai.com/api/v1/models?${q}`, { headers: { 'User-Agent': 'twine-forge' } });
+  const res = await fetch(`https://civitai.com/api/v1/models?${q}`, { headers: { 'User-Agent': 'story-forge' } });
   if (!res.ok) throw new Error(`Civitai search failed: HTTP ${res.status}`);
   const j = await res.json();
   return (j.items || []).map((m) => {
@@ -134,7 +134,7 @@ export async function civitaiSearch(query, { types = 'Checkpoint', baseModels = 
 export async function installCivitai(versionId, { log = console.log } = {}) {
   const sm = stabilityMatrixDir();
   if (!sm) throw new Error('Stability Matrix library not found. Set FORGE_SM_DIR.');
-  const v = await (await fetch(`https://civitai.com/api/v1/model-versions/${versionId}`, { headers: { 'User-Agent': 'twine-forge' } })).json();
+  const v = await (await fetch(`https://civitai.com/api/v1/model-versions/${versionId}`, { headers: { 'User-Agent': 'story-forge' } })).json();
   if (!v?.id) throw new Error(`Civitai version ${versionId} not found`);
   const file = (v.files || []).find((f) => f.primary) || v.files?.[0];
   const type = v.model?.type || 'Checkpoint';

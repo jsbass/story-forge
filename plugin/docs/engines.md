@@ -1,6 +1,6 @@
 # Engines and adapters
 
-Twine Forge keeps the creative work engine-neutral and puts everything engine-specific behind an **adapter**.
+Story Forge keeps the creative work engine-neutral and puts everything engine-specific behind an **adapter**.
 
 | Engine-neutral (works for any engine) | Engine-specific (the adapter) |
 |---|---|
@@ -14,7 +14,7 @@ Twine Forge keeps the creative work engine-neutral and puts everything engine-sp
 
 - `engines.json` - the catalog the Engine Advisor scores designs against: features, and for each engine a fit (`yes` / `partial` / `no`) plus `forge_support` (`supported`, `planned`, `not-planned`).
 - `tools/engines/index.mjs`
-  - `ADAPTERS` - engines Twine Forge can build. Today: `sugarcube`.
+  - `ADAPTERS` - engines Story Forge can build. Today: `sugarcube`.
   - `engineFor(config)` - the adapter for `forge.yaml → engine.name`; `forge build` and `forge release` go through it.
   - `detectNeeds(root)` / `fitReport(needs)` - `forge engine check`.
   - `setEngine(root, name)` - `forge engine set` (buildable engines only): records the choice and installs the adapter's preset pack.

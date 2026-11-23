@@ -1,5 +1,5 @@
 ---
-description: Run Twine Forge QA (functional, character consistency, performance) on the latest build
+description: Run Story Forge QA (functional, character consistency, performance) on the latest build
 argument-hint: [functional|character|performance|all]
 ---
 

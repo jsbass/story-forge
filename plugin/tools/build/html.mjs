@@ -39,7 +39,7 @@ export function compileHtml({ passages, format, title, ifid, start }) {
 
   const raw = (s) => s.replace(/<\/(script|style)/gi, '<\\/$1');
   const data =
-    `<tw-storydata name="${escapeHtml(title)}" startnode="${startPid}" creator="Twine Forge" creator-version="0.1.0" ` +
+    `<tw-storydata name="${escapeHtml(title)}" startnode="${startPid}" creator="Story Forge" creator-version="0.1.0" ` +
     `format="${escapeHtml(format.name)}" format-version="${escapeHtml(format.version)}" ifid="${escapeHtml(ifid)}" options="" tags="" zoom="1" hidden>` +
     `<style role="stylesheet" id="twine-user-stylesheet" type="text/twine-css">${raw(styles.join('\n\n'))}</style>` +
     `<script role="script" id="twine-user-script" type="text/twine-javascript">${raw(scripts.join('\n\n'))}</script>` +

@@ -1,6 +1,6 @@
 ---
 name: art-direction
-description: Runs the Twine Forge Art Direction step with the user - choose an art style, see quick samples, pick or install suitable models for the project's asset tool, and record the result in forge.yaml art. Use during the concept interview, or when the user wants to change the game's look or upgrade asset generation (/forge:upgrade-assets).
+description: Runs the Story Forge Art Direction step with the user - choose an art style, see quick samples, pick or install suitable models for the project's asset tool, and record the result in forge.yaml art. Use during the concept interview, or when the user wants to change the game's look or upgrade asset generation (/forge:upgrade-assets).
 ---
 
 # Art Direction

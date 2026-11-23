@@ -1,4 +1,4 @@
-/* Twine Forge runtime - core (included in every build) */
+/* Story Forge runtime - core (included in every build) */
 (function () {
   'use strict';
   var F = (setup.forge = setup.forge || {});

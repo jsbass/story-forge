@@ -1,5 +1,5 @@
 ---
-description: Run the next Twine Forge pipeline stage up to its approval gate
+description: Run the next Story Forge pipeline stage up to its approval gate
 argument-hint: [stage]
 ---
 

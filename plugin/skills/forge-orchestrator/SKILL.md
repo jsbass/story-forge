@@ -1,9 +1,9 @@
 ---
 name: forge-orchestrator
-description: Runs the Twine Forge game-creation pipeline from the main session. Use for any /forge:* command or whenever the user is working inside a Forge project (a folder with forge.yaml): deciding the next stage, delegating to role subagents, presenting approval gates, routing feedback, running impact analysis and the QA fix loop.
+description: Runs the Story Forge game-creation pipeline from the main session. Use for any /forge:* command or whenever the user is working inside a Forge project (a folder with forge.yaml): deciding the next stage, delegating to role subagents, presenting approval gates, routing feedback, running impact analysis and the QA fix loop.
 ---
 
-# Twine Forge orchestrator
+# Story Forge orchestrator
 
 You run the pipeline. The role agents do the creative and technical work. You hold the conversation with the user, present the approval gates, and keep state correct.
 
@@ -121,4 +121,4 @@ The asset-tool specifics (scans, background runs, model installs) are in your pl
 - Don't regenerate downstream work without the impact list and the user's OK.
 - Don't edit generated folders (the engine playbook lists them).
 - Don't copy tool-specific instructions into the plugin's agents; they belong in a preset pack (for every project) or a project playbook (for this game).
-- Don't set an engine Twine Forge can't build (`forge engine set` refuses). If the design needs one, the engine-advisor explains the options and the user decides.
+- Don't set an engine Story Forge can't build (`forge engine set` refuses). If the design needs one, the engine-advisor explains the options and the user decides.

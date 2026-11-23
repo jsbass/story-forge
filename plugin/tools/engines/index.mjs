@@ -1,4 +1,4 @@
-// Engines: the adapter registry (what Twine Forge can build) and the Engine Advisor's fit check
+// Engines: the adapter registry (what Story Forge can build) and the Engine Advisor's fit check
 // (which engine suits this design). See docs/engines.md for the adapter contract.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -9,7 +9,7 @@ import { installPack } from '../lib/packs.mjs';
 import { build as sugarcubeBuild, compileScripts } from '../build/builder.mjs';
 
 /**
- * Adapters: one per engine Twine Forge can build. An adapter turns the engine-neutral project
+ * Adapters: one per engine Story Forge can build. An adapter turns the engine-neutral project
  * (design/, characters/, script/*.script.md, assets/manifest.yaml, loops) into build/<mode>/ and
  * build/build-info.json, and says which QA and packaging steps apply to its output.
  */
@@ -36,7 +36,7 @@ export function engineFor(config) {
   if (a) return a;
   const cat = loadEngineCatalog().engines[name];
   throw new Error(cat
-    ? `forge.yaml engine '${name}' (${cat.label}) is ${cat.forge_support} in Twine Forge - no build adapter yet. Supported: ${Object.keys(ADAPTERS).join(', ')}`
+    ? `forge.yaml engine '${name}' (${cat.label}) is ${cat.forge_support} in Story Forge - no build adapter yet. Supported: ${Object.keys(ADAPTERS).join(', ')}`
     : `Unknown engine '${name}' in forge.yaml. Known: ${Object.keys(loadEngineCatalog().engines).join(', ')}`);
 }
 
@@ -130,7 +130,7 @@ export function formatFit(needs, passages, report) {
   } else {
     lines.push('No buildable engine covers this design. Rework the blockers (e.g. turn-based instead of real-time), or plan for another engine:');
   }
-  if (report.alternatives.length) lines.push(`Also a good fit, not buildable by Twine Forge yet: ${report.alternatives.map((id) => report.rows.find((r) => r.id === id).label).join(', ')}`);
+  if (report.alternatives.length) lines.push(`Also a good fit, not buildable by Story Forge yet: ${report.alternatives.map((id) => report.rows.find((r) => r.id === id).label).join(', ')}`);
   return lines.join('\n');
 }
 

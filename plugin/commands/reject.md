@@ -1,5 +1,5 @@
 ---
-description: Request changes to the Twine Forge stage at its gate
+description: Request changes to the Story Forge stage at its gate
 argument-hint: [stage] <what should change>
 ---
 

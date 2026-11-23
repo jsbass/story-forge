@@ -1,7 +1,7 @@
 {
-  "name": "twine-forge",
+  "name": "story-forge",
   "version": "0.1.0",
-  "description": "Claude Code plugin: agent pipeline that turns a game idea into a tested Twine (SugarCube 2) game.",
+  "description": "Claude Code plugin: agent pipeline that turns a game idea into a tested narrative game on any supported engine (SugarCube 2 today, via preset packs).",
   "type": "module",
   "private": true,
   "bin": {

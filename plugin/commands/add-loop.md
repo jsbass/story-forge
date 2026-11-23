@@ -1,5 +1,5 @@
 ---
-description: Design and add a new gameplay loop module to an in-progress Twine Forge game
+description: Design and add a new gameplay loop module to an in-progress Story Forge game
 argument-hint: [idea]
 ---
 

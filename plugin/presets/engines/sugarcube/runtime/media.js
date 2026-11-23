@@ -1,4 +1,4 @@
-/* Twine Forge runtime - media: backgrounds, portraits, music/ambience loops, sfx, voice, video.
+/* Story Forge runtime - media: backgrounds, portraits, music/ambience loops, sfx, voice, video.
  *
  * Semantics (match skills/forge-script/reference.md):
  *   @bg id          background persists until the next @bg (saved with the game)

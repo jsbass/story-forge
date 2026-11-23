@@ -110,7 +110,7 @@ test('engine fit: sugarcube for text loops, blockers for physics', () => {
 test('engine adapters: only buildable engines resolve', () => {
   assert.equal(engineFor({ engine: { name: 'sugarcube' } }).id, 'sugarcube');
   assert.throws(() => engineFor({}), /No engine chosen yet/);
-  assert.throws(() => engineFor({ engine: { name: 'renpy' } }), /planned in Twine Forge - no build adapter/);
+  assert.throws(() => engineFor({ engine: { name: 'renpy' } }), /planned in Story Forge - no build adapter/);
   assert.throws(() => engineFor({ engine: { name: 'zork' } }), /Unknown engine/);
   const cat = loadEngineCatalog();
   for (const [id, e] of Object.entries(cat.engines)) {
