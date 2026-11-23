@@ -5,10 +5,8 @@
   var ifid = (F.build && F.build.ifid) || 'forge';
   var covKey = 'forge-coverage-' + ifid;
 
-  /* Turn counter used by the automated QA walker to detect navigation. */
-  window.__forgeTurn = 0;
+  /* (The QA turn counter, window.__forgeTurn, lives in core.js so release builds can be tested too.) */
   $(document).on(':passageend', function () {
-    window.__forgeTurn += 1;
     var cov = loadCov();
     cov[State.passage] = (cov[State.passage] || 0) + 1;
     try { localStorage.setItem(covKey, JSON.stringify(cov)); } catch (e) { /* ignore */ }

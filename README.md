@@ -2,7 +2,7 @@
 
 A Claude Code plugin that turns a game idea into a playable, tested **Twine (SugarCube 2)** game. Role-specific agents do the work, and you approve each stage at a gate. The full design is in [docs/SPEC.md](docs/SPEC.md).
 
-**Status: Phases 1–2.**
+**Status: Phases 1–3.**
 - **Phase 1, the narrative core:** a text-only game end to end. Interview, story bible, characters, game loops, script, build, then QA and playtest.
 - **Phase 2, assets:**
   - a platform assessment of the GPU and ComfyUI
@@ -10,7 +10,12 @@ A Claude Code plugin that turns a game idea into a playable, tested **Twine (Sug
   - generation with a local ComfyUI, and a review gallery
   - backgrounds, portraits, audio and video in the game
 
-Optimization and packaging come in Phase 3.
+- **Phase 3, optimization and release:**
+  - an optimizer: WebP images capped to display size, small variants for phones, video posters, image prefetching
+  - performance QA in headless Chromium: desktop and a throttled phone profile, checked against budgets
+  - packaging for an itch.io zip, a single HTML file, a static website, and an Electron desktop app
+
+Shared style profiles and more loop modules come in Phase 4.
 
 Phase 2 needs ComfyUI running (by default at `http://127.0.0.1:8188`). These workflows have been tested live on an RTX 3070 (8 GB):
 
@@ -22,8 +27,9 @@ Phase 2 needs ComfyUI running (by default at `http://127.0.0.1:8188`). These wor
 | IP-Adapter portrait | ~26 s |
 | ACE-Step 1.5 music, 30 s track | ~14 s |
 | Wan 2.2 video, 2 s at 480p | ~87 s |
+| Stable Audio 3 Medium sound effects and ambience, 12 s clip | ~10 s cold, ~3 s warm |
 
-The Stable Audio sound-effects workflow is still `untested`: its model is gated on Hugging Face and has to be downloaded manually. Voice-over has no workflow yet.
+The Stable Audio Open fallback is still `untested`: its model is gated on Hugging Face and has to be downloaded manually. Voice-over has no workflow yet.
 
 ## Install
 
@@ -48,6 +54,8 @@ The commands are namespaced `/forge:*`.
 | `/forge:assess` | Shows what this machine can generate and the upgrade options |
 | `/forge:assets [kind]` | Generates a batch of assets and opens the review gallery |
 | `/forge:upgrade-assets` | Installs approved models mid-project, then unblocks or regenerates assets |
+| `/forge:optimize` | Optimizes media and checks the performance budgets |
+| `/forge:release` | Runs a final QA pass on the optimized build and packages every distribution target |
 
 `/forge:new` installs the following **into the game project**. The plugin itself has no install step.
 - `yaml` and `playwright` from npm
@@ -58,13 +66,14 @@ The commands are namespaced `/forge:*`.
 
 | Path | Contents |
 |---|---|
-| `agents/` | Role subagents: story-planner, engine-advisor, character-designer, loop-designer, dialog-writer, asset-generator, game-builder, qa-functional, qa-character |
+| `agents/` | Role subagents: story-planner, engine-advisor, character-designer, loop-designer, dialog-writer, asset-generator, game-builder, perf-optimizer, qa-functional, qa-character, qa-performance, game-packager |
 | `skills/` | `forge-orchestrator` (runs the pipeline), `story-interview`, `art-direction`, `loop-design`, `forge-script` (the dialog format reference) |
 | `commands/` | The `/forge:*` slash commands |
 | `tools/forge.mjs` | The CLI the agents use, run as `node .forge/forge.mjs <cmd>` inside a project |
 | `tools/script/` | The Forge Script parser and its deterministic compiler to Twee |
 | `tools/build/` | The Twee → Twine 2 HTML compiler, the builder, and the playtest server |
-| `tools/qa/` | Static analysis, Playwright playthroughs, and the knowledge-timeline check |
+| `tools/qa/` | Static analysis, Playwright playthroughs, the knowledge-timeline check, and performance QA |
+| `tools/release/` | The optimizer and the packager (itch.io zip, single HTML, web, Electron) |
 | `tools/lib/` | Pipeline state and gates, the dependency graph and impact analysis, the feedback log, git |
 | `tools/assets/` | The ComfyUI client, workflow library, platform assessor, model installer (Stability Matrix and Civitai), asset manifest, generation queue, and review gallery |
 | `workflows/` | Built-in ComfyUI workflows: SDXL images and drafts, upscaling, IP-Adapter portraits, Stable Audio, ACE-Step 1.5, Wan 2.2 |
@@ -80,4 +89,6 @@ The commands are namespaced `/forge:*`.
 npm test        # unit tests (no dependencies needed)
 ```
 
-For an end-to-end check, run `node tools/forge.mjs new <tmp>/game --title Test`, copy in `examples/lantern-keeper/*`, then run `node .forge/forge.mjs build` and `node .forge/forge.mjs qa functional`.
+For an end-to-end check, run `node tools/forge.mjs new <tmp>/game --title Test`, copy in `examples/lantern-keeper/*`, then run `node .forge/forge.mjs build` and `node .forge/forge.mjs qa functional`. `node .forge/forge.mjs release` then runs the optimizer, QA on the optimized build, and packaging.
+
+Building desktop executables (`package desktop --build --yes`) downloads Electron from npm. Publishing to itch.io (`publish itch --yes`) uses butler, which you install and log in to yourself.

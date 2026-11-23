@@ -15,7 +15,7 @@ function readBody(req) {
 }
 
 /** Serve a file with HTTP Range support (browsers need 206 responses to seek/loop audio and video). */
-function sendFile(res, dir, urlPath, req = null) {
+export function sendFile(res, dir, urlPath, req = null) {
   const file = path.normalize(path.join(dir, urlPath));
   if (!file.startsWith(path.normalize(dir))) { res.writeHead(403); res.end(); return; }
   fs.stat(file, (err, st) => {
@@ -62,6 +62,15 @@ export function serveReview(root, { port = 4174, decide, log = console.log } = {
   });
   server.listen(port, '127.0.0.1', () => log(`Asset review: http://127.0.0.1:${port}/  (decisions update assets/manifest.yaml)`));
   return server;
+}
+
+/** Plain static server (performance QA). port 0 = any free port. Resolves to {server, url}. */
+export function serveStatic(dir, { port = 0, index = 'index.html' } = {}) {
+  const server = http.createServer((req, res) => {
+    const urlPath = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+    sendFile(res, dir, urlPath === '/' ? index : urlPath, req);
+  });
+  return new Promise((resolve) => server.listen(port, '127.0.0.1', () => resolve({ server, url: `http://127.0.0.1:${server.address().port}/` })));
 }
 
 export function servePlaytest(root, { port = 4173, dir = path.join(root, 'build', 'dev'), log = console.log } = {}) {

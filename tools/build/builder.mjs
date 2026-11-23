@@ -54,6 +54,39 @@ export function collectMedia(root, results) {
   return { files, urls, referenced, missing: referenced.filter((k) => !files[k]) };
 }
 
+/** The generated forge-data.js passage: runtime data (characters, modules, asset URLs, build info). */
+export function forgeDataJs(ctx, mode) {
+  const set = (k, v, indent = 2) => `setup.forge.${k} = ${JSON.stringify(v, null, indent)};`;
+  return [
+    GENERATED,
+    'setup.forge = setup.forge || {};',
+    set('characters', ctx.characters),
+    set('modules', ctx.modules),
+    set('invariants', ctx.invariants),
+    set('endings', ctx.endings),
+    set('assets', ctx.assets),
+    set('assetsSmall', ctx.assetsSmall || {}),
+    set('posters', ctx.posters || {}),
+    set('mediaByPassage', ctx.mediaByPassage || {}, 0),
+    set('build', { ...ctx.build, mode }, 0),
+    '',
+  ].join('\n');
+}
+
+/**
+ * Re-render a built mode's HTML with different runtime data (e.g. optimized or inlined asset URLs).
+ * Uses build/<mode>/story.twee and build/forge-data.json from the last build.
+ */
+export function renderBuild(root, { mode = 'release', mutate = (ctx) => ctx } = {}) {
+  const project = loadProject(root);
+  const b = project.paths.build;
+  const info = JSON.parse(readText(path.join(b, 'build-info.json')));
+  const ctx = mutate(structuredClone(JSON.parse(readText(path.join(b, 'forge-data.json')))));
+  const passages = parseTwee(readText(path.join(b, mode, 'story.twee'))).map((p) => (p.name === 'forge-data.js' ? { ...p, text: forgeDataJs(ctx, mode) } : p));
+  const format = loadStoryFormat(readText(project.paths.formatJs));
+  return { html: compileHtml({ passages, format, title: info.title, ifid: project.config.ifid, start: info.start }), ctx, info };
+}
+
 /** Compile and validate all scripts. */
 export function compileScripts(project) {
   const files = listFiles(project.paths.script, (f) => f.endsWith('.script.md'));
@@ -161,15 +194,26 @@ export async function build(root, { modes = ['dev', 'release'] } = {}) {
     `:: StoryData\n${JSON.stringify({ ifid, format: 'SugarCube', 'format-version': formatVersion, start, zoom: 1 }, null, 2)}\n`,
     `:: StoryInit [nobr]\n${storyInit || '/% no variables declared %/'}\n`,
   ].join('\n'));
-  const data = (mode) => `${GENERATED}
-setup.forge = setup.forge || {};
-setup.forge.characters = ${JSON.stringify(characters, null, 2)};
-setup.forge.modules = ${JSON.stringify(vm.modules, null, 2)};
-setup.forge.invariants = ${JSON.stringify(vm.invariants, null, 2)};
-setup.forge.endings = ${JSON.stringify(endings, null, 2)};
-setup.forge.assets = ${JSON.stringify(media.urls, null, 2)};
-setup.forge.build = ${JSON.stringify({ id: buildId, mode, ifid, title, historyMaxStates: config.runtime?.history_max_states || 20 })};
-`;
+  // Images each passage shows, so the runtime can prefetch them when a link to that passage appears.
+  const mediaByPassage = {};
+  for (const m of results.flatMap((r) => r.refs.media)) {
+    if (m.kind !== 'bg' && m.kind !== 'portrait') continue;
+    const k = `${m.kind}:${m.kind === 'portrait' ? `${m.args[0]}.${m.args[1] || 'neutral'}` : m.args[0]}`;
+    if (!media.urls[k]) continue;
+    (mediaByPassage[m.passage] ||= []).includes(k) || mediaByPassage[m.passage].push(k);
+  }
+  const dataCtx = {
+    characters,
+    modules: vm.modules,
+    invariants: vm.invariants,
+    endings,
+    assets: media.urls,
+    assetsSmall: {},
+    posters: {},
+    mediaByPassage,
+    build: { id: buildId, ifid, title, historyMaxStates: config.runtime?.history_max_states || 20 },
+  };
+  const data = (mode) => forgeDataJs(dataCtx, mode);
   const engineDir = path.join(PLUGIN_ROOT, 'engine');
   writeText(path.join(genEngine, 'forge-data.twee'), wrapCode('forge-data.js', ['script'], data('dev')));
   writeText(path.join(genEngine, 'core.twee'), [
@@ -256,6 +300,7 @@ setup.forge.build = ${JSON.stringify({ id: buildId, mode, ifid, title, historyMa
     invariants: vm.invariants,
   };
   writeJson(path.join(paths.build, 'script-manifest.json'), manifest);
+  writeJson(path.join(paths.build, 'forge-data.json'), dataCtx);
   const info = {
     id: buildId,
     at: new Date().toISOString(),

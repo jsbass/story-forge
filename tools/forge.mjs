@@ -12,6 +12,9 @@ import { commitAll, tag, tagExists, restorePaths, headShort, listTags } from './
 import { build, compileScripts, BuildError } from './build/builder.mjs';
 import { servePlaytest } from './build/serve.mjs';
 import { runStatic, runFunctional, characterQaInput, summarize } from './qa/report.mjs';
+import { runPerformance } from './qa/perf.mjs';
+import { optimize, formatOptimize } from './release/optimize.mjs';
+import { packageGame, formatRelease, butlerPush, distributionSettings } from './release/package.mjs';
 
 const HELP = `Twine Forge CLI
 
@@ -38,7 +41,16 @@ Build & QA
   playtest [--port 4173]              serve build/dev with the feedback endpoint
   qa static [--json]                  graph/variable analysis of the last build
   qa functional [--walks 60] [--max-steps 150] [--seed 1]   static + automated playthroughs
+  qa functional --build optimized     re-run the playthroughs on build/optimized (the shipped game)
+  qa performance [--target optimized,web,single-html]   load/transition/memory/save checks vs budgets
   qa character [--character id]       JSON input for the character-QA agent (lines + knowledge risks)
+
+Release (Phase 3)
+  optimize                            build/release -> build/optimized (WebP images, phone variants, posters)
+  package [itch|single-html|web|desktop ...] [--force]   build/optimized -> dist/ (default: forge.yaml distribution)
+  package desktop --build --yes       also download Electron (~100 MB) and build the executables (after approval)
+  release [--walks 30] [--skip-performance]   build + optimize + QA on the shipped build + package
+  publish itch [--project user/game] [--channel html5] --yes   butler push (only after the user approves)
   loops                               list loop modules and the variables they own
   template [name]                     list templates, or print one (e.g. character.yaml, forge-script)
 
@@ -113,6 +125,23 @@ function formatStatus(s) {
     for (const f of s.openFeedback) lines.push(`  ${f.id} [${f.route}] ${f.summary}`);
   }
   return lines.join('\n');
+}
+
+function printFunctional(root, r) {
+  console.log(`Functional QA${r.file.includes('functional-') ? ` (${path.basename(r.file, '.md').slice('functional-'.length)})` : ''} (build ${r.buildId}): ${r.summary.pass ? 'PASS' : 'FAIL'}  S1 ${r.summary.S1} · S2 ${r.summary.S2} · S3 ${r.summary.S3} · S4 ${r.summary.S4}`);
+  console.log(`  coverage ${r.walk.coverage.percent}% · endings ${r.walk.endings.reached.length}/${r.walk.endings.total} · ${r.walk.walks} playthroughs`);
+  console.log(`  report: ${path.relative(root, r.file)}`);
+}
+
+function printPerformance(root, r) {
+  console.log(`Performance QA (build ${r.buildId}): ${r.summary.pass ? 'PASS' : 'FAIL'}  S1 ${r.summary.S1} · S2 ${r.summary.S2} · S3 ${r.summary.S3} · S4 ${r.summary.S4}`);
+  for (const [name, t] of Object.entries(r.targets)) {
+    const m = t.results.find((x) => x.profile === 'mobile');
+    const d = t.results.find((x) => x.profile === 'desktop');
+    console.log(`  ${name}: first passage ${m.first_passage_ms} ms phone / ${d.first_passage_ms} ms desktop · transition p95 ${m.transition_p95_ms} / ${d.transition_p95_ms} ms · ${Math.round(t.files.html_bytes / 1024)} KB html, ${(t.files.total_bytes / 1048576).toFixed(1)} MB total · heap +${d.heap_growth_mb} MB over ${d.transitions}`);
+  }
+  for (const f of r.findings) console.log(`  ${f.severity} ${f.kind.padEnd(12)} [${f.target}] ${f.message}`);
+  console.log(`  report: ${path.relative(root, r.file)}`);
 }
 
 async function main() {
@@ -256,19 +285,66 @@ async function main() {
           walks: Number(flags.walks) || 60,
           maxSteps: Number(flags['max-steps']) || 150,
           seed: Number(flags.seed) || 1,
+          label: typeof flags.build === 'string' && flags.build !== 'dev' ? flags.build : null,
           log: flags.verbose ? console.log : () => {},
         });
         if (flags.json) out(r, true);
-        else {
-          console.log(`Functional QA (build ${r.buildId}): ${r.summary.pass ? 'PASS' : 'FAIL'}  S1 ${r.summary.S1} · S2 ${r.summary.S2} · S3 ${r.summary.S3} · S4 ${r.summary.S4}`);
-          console.log(`  coverage ${r.walk.coverage.percent}% · endings ${r.walk.endings.reached.length}/${r.walk.endings.total} · ${r.walk.walks} playthroughs`);
-          console.log(`  report: ${path.relative(root, path.join(r.reportDir, 'functional.md'))}`);
-        }
+        else printFunctional(root, r);
+        if (!r.summary.pass) process.exitCode = 1;
+        return;
+      }
+      if (sub === 'performance') {
+        const r = await runPerformance(root, { targets: list(flags.target), log: flags.verbose ? console.log : () => {} });
+        if (flags.json) out(r, true);
+        else printPerformance(root, r);
         if (!r.summary.pass) process.exitCode = 1;
         return;
       }
       if (sub === 'character') return out(characterQaInput(root, flags.character || null), true);
-      throw new Error('Usage: forge qa static|functional|character');
+      throw new Error('Usage: forge qa static|functional|performance|character');
+    }
+
+    case 'optimize': {
+      const r = await optimize(root, { log: () => {} });
+      return out(flags.json ? r : formatOptimize(r), flags.json);
+    }
+
+    case 'package': {
+      const targets = pos.length ? pos : null;
+      if (flags.build && !flags.yes) throw new Error('`--build` downloads Electron (~100 MB) and @electron/packager from npm. Ask the user first, then re-run with --yes.');
+      const r = packageGame(root, { targets, force: !!flags.force, buildDesktop: !!(flags.build && flags.yes) });
+      out(flags.json ? r : formatRelease(r), flags.json);
+      if (Object.keys(r.errors).length) process.exitCode = 1;
+      return;
+    }
+
+    case 'release': {
+      // Build -> optimize -> functional QA on the shipped build -> performance QA -> package.
+      const info = await build(root, { modes: ['dev', 'release'] });
+      console.log(`Build ${info.id}: ${info.storyPassages} story passages, ${info.endings.length} endings`);
+      if (info.media.missing.length) console.log(`  note: ${info.media.missing.length} media cue(s) have no approved asset and are skipped in release`);
+      console.log(formatOptimize(await optimize(root, { log: () => {} })));
+      const fr = await runFunctional(root, { walks: Number(flags.walks) || 30, maxSteps: 150, seed: 1, label: 'optimized' });
+      printFunctional(root, fr);
+      let pass = fr.summary.pass;
+      if (!flags['skip-performance']) {
+        const pr = await runPerformance(root, { targets: ['optimized'] });
+        printPerformance(root, pr);
+        pass = pass && pr.summary.pass;
+      }
+      const r = packageGame(root, { force: !!flags.force });
+      console.log(formatRelease(r));
+      if (!pass) console.log('\nQA found S1/S2 issues - the packages were written, but fix the issues before shipping (see the reports above).');
+      if (!pass || Object.keys(r.errors).length) process.exitCode = 1;
+      return;
+    }
+
+    case 'publish': {
+      if (pos[0] !== 'itch') throw new Error('Usage: forge publish itch [--project user/game] [--channel html5] --yes');
+      const d = distributionSettings(loadProject(root).config).itch;
+      const r = butlerPush(root, { project: flags.project || d.project, channel: flags.channel || d.channel, yes: !!flags.yes });
+      console.log(r.ran ? `Pushed: ${r.command}` : `Would run: ${r.command}\nPublishing is public-facing: ask the user, then re-run with --yes. (butler must be installed and logged in by the user: butler login)`);
+      return;
     }
 
     case 'assets':

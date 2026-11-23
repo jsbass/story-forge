@@ -13,8 +13,10 @@ export const STAGES = [
   { id: 'script', label: 'Script / dialog', owner: 'dialog-writer', artifacts: ['script/'] },
   { id: 'assets', label: 'Assets (ComfyUI)', owner: 'asset-generator', artifacts: ['assets/manifest.yaml'] },
   { id: 'build', label: 'Build (SugarCube)', owner: 'game-builder', artifacts: ['src/'] },
-  { id: 'qa', label: 'QA (functional + character)', owner: 'qa-functional, qa-character', artifacts: ['qa/reports/'] },
+  { id: 'optimize', label: 'Optimize (media + budgets)', owner: 'perf-optimizer', artifacts: ['release/optimize.json'] },
+  { id: 'qa', label: 'QA (function/character/perf)', owner: 'qa-functional, qa-character, qa-performance', artifacts: ['qa/reports/'] },
   { id: 'playtest', label: 'Playtest sign-off', owner: 'you', artifacts: [] },
+  { id: 'release', label: 'Release packages', owner: 'game-packager', artifacts: ['release/release.json'] },
 ];
 
 export const STATUS = ['pending', 'in_progress', 'awaiting_approval', 'approved'];

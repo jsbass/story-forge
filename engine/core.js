@@ -30,6 +30,27 @@
     F.mediaLog = [];
   });
 
+  /* QA hooks (cheap; kept in release builds so the shipped game can be tested):
+     window.__forgeTurn counts rendered passages (the walker waits on it);
+     window.__forgePerf records time to the first passage and click-to-render latency. */
+  window.__forgeTurn = 0;
+  var perf = (window.__forgePerf = { first: null, transitions: [], clickAt: null });
+  document.addEventListener('click', function () { perf.clickAt = performance.now(); }, true);
+  $(document).on(':passageend', function () {
+    window.__forgeTurn += 1;
+    var clickAt = perf.clickAt;
+    perf.clickAt = null;
+    var raf = window.requestAnimationFrame || function (f) { setTimeout(f, 16); };
+    raf(function () {
+      var now = performance.now();
+      if (perf.first === null) perf.first = now;
+      else if (clickAt !== null) {
+        perf.transitions.push(Math.round(now - clickAt));
+        if (perf.transitions.length > 1000) perf.transitions.shift();
+      }
+    });
+  });
+
   /* Accessibility settings */
   function applyScale() {
     document.documentElement.style.setProperty('--forge-text-scale', String((settings.textScale || 100) / 100));

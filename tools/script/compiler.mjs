@@ -134,7 +134,9 @@ export function toTwee(passages, header = '') {
   const blocks = passages.map((p) => {
     const tags = p.tags && p.tags.length ? ` [${p.tags.join(' ')}]` : '';
     const meta = p.position ? ` ${JSON.stringify({ position: p.position, size: p.size || '100,100' })}` : '';
-    return `:: ${p.name}${tags}${meta}\n${p.text}\n`;
+    // Twee 3 escaping, so the file round-trips through parseTwee (and the Twine editor's import).
+    const name = p.name.replace(/[\\[\]{}]/g, '\\$&');
+    return `:: ${name}${tags}${meta}\n${p.text.replace(/^::/gm, '\\::')}\n`;
   });
   return (header ? header + '\n\n' : '') + blocks.join('\n');
 }

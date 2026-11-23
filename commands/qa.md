@@ -1,12 +1,12 @@
 ---
-description: Run Twine Forge QA (functional + character consistency) on the latest build
-argument-hint: [functional|character|all]
+description: Run Twine Forge QA (functional, character consistency, performance) on the latest build
+argument-hint: [functional|character|performance|all]
 ---
 
 Run QA: $ARGUMENTS (default: all)
 
-1. Rebuild first with `node .forge/forge.mjs build`, so QA checks the current scripts.
-2. Run the requested agents. For `all`, run `qa-functional` and `qa-character` **in parallel**.
+1. Rebuild first with `node .forge/forge.mjs build`, so QA checks the current scripts. For `performance` (and `all`), also run `node .forge/forge.mjs optimize`.
+2. Run the requested agents. For `all`, run `qa-functional`, `qa-character` and `qa-performance` **in parallel**.
 3. Combine their findings using the *QA fix loop* in the `forge-orchestrator` skill:
    - list any S3/S4 auto-fixes that were applied, with their commits
    - present each S1/S2 finding with the proposed fix and its feedback id

@@ -35,16 +35,22 @@ export function runStatic(root) {
 
 export async function runFunctional(root, opts = {}) {
   const b = runStatic(root);
-  const html = path.join(b.project.paths.build, 'dev', 'index.html');
-  const walk = await runWalks(root, { graph: b.static.graph, html, ...opts });
-  writeJson(path.join(b.reportDir, 'coverage.json'), walk.coverage);
-  writeJson(path.join(b.reportDir, 'walk.json'), walk);
+  // label 'optimized' re-runs the walks on build/optimized (the shipped game) after the optimizer.
+  const { label = null, ...walkOpts } = opts;
+  const html = path.join(b.project.paths.build, label || 'dev', 'index.html');
+  if (!fs.existsSync(html)) throw new Error(`${path.relative(root, html)} not found`);
+  const walk = await runWalks(root, { graph: b.static.graph, html, ...walkOpts });
+  const sfx = label ? `-${label}` : '';
+  writeJson(path.join(b.reportDir, `coverage${sfx}.json`), walk.coverage);
+  writeJson(path.join(b.reportDir, `walk${sfx}.json`), walk);
   const md = functionalMarkdown(b, b.static, walk);
-  writeText(path.join(b.reportDir, 'functional.md'), md);
+  writeText(path.join(b.reportDir, `functional${sfx}.md`), label ? md.replace(/^# Functional QA — build (\S+)/, `# Functional QA (${label}) — build $1`) : md);
   const all = [...b.static.findings, ...walk.findings];
   const summary = summarize(all);
-  writeJson(path.join(b.reportDir, 'summary.json'), { buildId: b.info.id, at: new Date().toISOString(), functional: summary, coverage: walk.coverage.percent, endings: walk.endings });
-  return { buildId: b.info.id, reportDir: b.reportDir, static: b.static, walk, summary };
+  const sumFile = path.join(b.reportDir, 'summary.json');
+  const prev = readJson(sumFile, {});
+  writeJson(sumFile, { ...prev, buildId: b.info.id, at: new Date().toISOString(), [`functional${label ? `_${label}` : ''}`]: summary, ...(label ? {} : { coverage: walk.coverage.percent, endings: walk.endings }) });
+  return { buildId: b.info.id, reportDir: b.reportDir, static: b.static, walk, summary, file: path.join(b.reportDir, `functional${sfx}.md`) };
 }
 
 export function summarize(findings) {

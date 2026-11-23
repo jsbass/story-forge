@@ -20,7 +20,30 @@
   Setting.addRange('musicVolume', { label: 'Music volume', min: 0, max: 100, step: 5, default: 60, onChange: applyVolumes });
   Setting.addRange('sfxVolume', { label: 'Sound volume', min: 0, max: 100, step: 5, default: 80, onChange: applyVolumes });
 
-  function url(kind, id) { return F.assets[kind + ':' + id] || null; }
+  /* Optimized release builds add smaller image variants, video posters, and a per-passage image list
+     (used to prefetch the images the next choices will show). */
+  F.assetsSmall = F.assetsSmall || {};
+  F.posters = F.posters || {};
+  F.mediaByPassage = F.mediaByPassage || {};
+  var conn = navigator.connection || {};
+  var small = !!conn.saveData || Math.max(window.innerWidth || 0, window.innerHeight || 0) <= 1024;
+
+  function url(kind, id) {
+    var k = kind + ':' + id;
+    return (small && F.assetsSmall[k]) || F.assets[k] || null;
+  }
+
+  var prefetched = {};
+  function prefetchNext() {
+    var n = 0;
+    $('#passages a[data-passage]').each(function () {
+      var keys = F.mediaByPassage[$(this).attr('data-passage')] || [];
+      for (var i = 0; i < keys.length && n < 6; i++) {
+        var parts = keys[i].split(':'), u = url(parts[0], parts.slice(1).join(':'));
+        if (u && !prefetched[u]) { prefetched[u] = true; n++; new Image().src = u; }
+      }
+    });
+  }
   function vol(kind) {
     var s = kind === 'music' ? settings.musicVolume : settings.sfxVolume;
     return (typeof s === 'number' ? s : kind === 'music' ? 60 : 80) / 100;
@@ -122,7 +145,8 @@
       }
       case 'video': {
         var v = url('video', id);
-        return v ? '<video class="forge-video" src="' + v + '" autoplay muted loop playsinline></video>' : chip('video', args);
+        var poster = F.posters['video:' + id];
+        return v ? '<video class="forge-video" src="' + v + '"' + (poster ? ' poster="' + poster + '"' : '') + ' preload="metadata" autoplay muted loop playsinline></video>' : chip('video', args);
       }
     }
     return '';
@@ -135,5 +159,8 @@
   $(document).on(':passagestart', function () {
     if (State.passage && !State.variables.forge_media) state();
   });
-  $(document).on(':passagedisplay', applyPersistent);
+  $(document).on(':passagedisplay', function () {
+    applyPersistent();
+    setTimeout(prefetchNext, 300);
+  });
 })();

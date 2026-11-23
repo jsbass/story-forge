@@ -9,7 +9,7 @@ You run the pipeline. The role agents do the creative and technical work. You ho
 
 **CLI:** from the project root, run `node .forge/forge.mjs <cmd>`. Run `node .forge/forge.mjs help` for the full list.
 
-## Stages (Phase 1)
+## Stages
 
 | # | Stage | Who does the work | Artifacts |
 |---|---|---|---|
@@ -20,8 +20,10 @@ You run the pipeline. The role agents do the creative and technical work. You ho
 | 5 | `script` | `dialog-writer` agent | `script/*.script.md` |
 | 6 | `assets` | `asset-generator` agent, plus the user's review in the gallery | `assets/manifest.yaml`, `assets/final/**` |
 | 7 | `build` | `game-builder` agent | `src/**`, `build/**` |
-| 8 | `qa` | `qa-functional` and `qa-character` agents, **in parallel** | `qa/reports/<build>/` |
-| 9 | `playtest` | **The user** plays the dev build | feedback |
+| 8 | `optimize` | `perf-optimizer` agent | `release/optimize.json`, `build/optimized/` |
+| 9 | `qa` | `qa-functional`, `qa-character` and `qa-performance` agents, **in parallel** | `qa/reports/<build>/` |
+| 10 | `playtest` | **The user** plays the dev build | feedback |
+| 11 | `release` | `game-packager` agent (`/forge:release`) | `release/release.json`, `dist/**` |
 
 The art style and model choices are made during the interview (stage 1), using the `art-direction` skill. Reference portraits (`<char>.ref`) may be generated as soon as `characters` is approved, before the `assets` stage formally starts.
 
@@ -69,7 +71,7 @@ Feedback from playtests arrives as `state/feedback/FB-*.md` with `source: playte
 
 ## QA fix loop
 
-After `build`, run `qa-functional` and `qa-character` in parallel, then combine their findings:
+After `build` and `optimize`, run `qa-functional`, `qa-character` and `qa-performance` in parallel, then combine their findings. Performance budget failures are always S2: never relax a budget without the user's OK.
 - **S3/S4:** the QA agents may auto-fix these, up to `limits.qa_fix_retries` attempts. Each fix gets its own commit and a resolved feedback item.
 - **S2:** present each one to the user with the proposed fix. Once approved, route it to the owning agent, rebuild, and re-run QA.
 - **S1:** these always go to the user. They usually mean a character sheet or plot decision has to change. Run the change through that stage's gate again.
@@ -94,6 +96,13 @@ The `qa` stage can be approved when there are no open S1/S2 findings, or when th
 3. Tell the user about the ⚙ overlay: jump to any passage, edit variables, see coverage, and send feedback, which is logged straight to `state/feedback/`.
 4. When the user is done, triage the new feedback with `feedback list --open` and route it as above. Approve `playtest` only when the user says the game is ready.
 
+## Optimize and release
+
+- `optimize` (after `build`): the `perf-optimizer` agent writes `build/optimized/` and tunes `forge.yaml → optimize` / `runtime` until `qa performance` meets `performance.budgets`. Gate: show media size before → after and the phone vs desktop numbers.
+- `release` (after `playtest`): `/forge:release`. `node .forge/forge.mjs release` rebuilds, optimizes, re-runs the playthroughs **on the optimized build**, runs performance QA, then packages every target in `forge.yaml → distribution` into `dist/` (git-ignored) and records them in `release/release.json`.
+- **Approval needed, every time:** building desktop executables (`package desktop --build --yes`) downloads Electron (~100 MB+) from npm; publishing (`publish itch --yes`) is public. Ask first, with what will be downloaded or published. The user installs and logs in to butler themselves.
+- Feedback about size, load time or saves routes to `perf-optimizer`; about packaging to `game-packager`.
+
 ## Rollback
 
 `node .forge/forge.mjs rollback stage/<stage>/v<N>` restores that stage's artifacts and commits the result. Then re-approve that stage. Later stages become stale.
@@ -102,4 +111,4 @@ The `qa` stage can be approved when there are no open S1/S2 findings, or when th
 - Don't let agents approve or submit stages. Only you do that, and only after the user approves at the gate.
 - Don't regenerate downstream work without the impact list and the user's OK.
 - Don't edit generated folders (`src/story`, `src/engine`, `src/modules`).
-- Phase 3 features (performance optimization, packaging for itch.io, single-HTML, web and desktop) aren't built yet. Record requests for them as feedback with `--stage release` and tell the user they're planned.
+- Phase 4 features (shared style profiles, more loop modules, engines beyond Twine) aren't built yet. Record requests as feedback and tell the user they're planned.

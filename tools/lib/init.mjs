@@ -25,7 +25,25 @@ rating:
   target: null         # e.g. E, T, M - set in the interview
   avoid: []            # themes/content to keep out (checked by QA)
 voice_over: false
+version: "1.0.0"       # release version (package file names, butler --userversion)
 distribution: [itch, single-html, web, desktop]
+distribution_settings:
+  single_html_max_mb: 25   # the single-HTML target fails above this (unless --force)
+  desktop:
+    platforms: [win32]     # also: darwin, linux (Electron, built on this machine, unsigned)
+    arch: x64
+  itch:
+    project: null          # "yourname/your-game" for butler push
+    channel: html5
+optimize:                  # perf-optimizer settings (defaults shown)
+  images: { format: webp, quality: 82, max: { bg: 1920, portrait: 768, ui: 1024 }, small: { bg: 960, portrait: 640 } }
+  video_posters: true
+  audio_bitrate: { music: 96k, ambience: 64k, sfx: 64k, voice: 48k }   # applied only if ffmpeg is found
+  ffmpeg: null
+performance:               # qa-performance budgets
+  budgets: { first_passage_ms: 2000, transition_ms: 100, html_kb: 2048, save_kb: 100, heap_growth_mb: 20, total_mb: 100 }
+  mobile: { cpu_slowdown: 4, download_kbps: 9000, upload_kbps: 1500, latency_ms: 150 }
+  long_session: 500
 style_profile: null
 art:                   # chosen in the Art Direction step of the interview
   style: null          # e.g. "painterly dark fantasy"
@@ -43,8 +61,10 @@ gates:                 # stages that pause for your approval (all on by default)
   script: true
   assets: true
   build: true
+  optimize: true
   qa: true
   playtest: true
+  release: true
 limits:
   qa_fix_retries: 3
   generations_per_asset: 4
@@ -57,6 +77,7 @@ vars: {}               # extra story variables: name: initial value
 const GITIGNORE = `node_modules/
 .forge/
 build/
+dist/
 qa/playthroughs/
 assets/raw/
 assets/review/
