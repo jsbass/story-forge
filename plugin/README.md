@@ -1,6 +1,6 @@
 # Story Forge
 
-A Claude Code plugin that turns a game idea into a playable, tested game. Role-specific agents do the work, and you approve each stage at a gate. The full design is in [docs/SPEC.md](docs/SPEC.md).
+A Claude Code plugin that turns a game idea into a playable, tested game. Role-specific agents do the work, and you approve each stage at a gate. The full design is in [docs/SPEC.md](docs/SPEC.md). For a step-by-step guide to making a game, including example prompts for letting Claude work on its own, see [docs/USAGE.md](docs/USAGE.md).
 
 The plugin is deliberately light: generic agents, skills, commands, the `forge` CLI, and **preset packs** that a project copies in when it needs them. It contains no game content and installs nothing itself.
 
