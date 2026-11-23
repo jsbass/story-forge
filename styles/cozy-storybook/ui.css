@@ -1,0 +1,14 @@
+/* Cozy storybook: dark ink on warm parchment. */
+:root { --cs-paper: #fff6e5; --cs-ink: #3b3a36; --cs-accent: #c8693d; --cs-leaf: #4f8a6d; --cs-panel: #f6e7cc; }
+body { background: var(--cs-paper); color: var(--cs-ink); }
+#story { font-family: 'Book Antiqua', 'Palatino Linotype', Georgia, serif; font-size: calc(1.1rem * var(--forge-text-scale, 1)); line-height: 1.7; }
+#ui-bar { background: var(--cs-panel); color: var(--cs-ink); border-right: 1px solid #e2c99c; }
+#ui-bar a, #menu li a, #ui-bar-toggle, #ui-bar-history [id|=history] { color: var(--cs-ink); border-color: #e2c99c; }
+#menu li a:hover { background: #efd9b0; }
+a.link-internal, a.link-internal:visited { color: var(--cs-accent); }
+a.link-internal:hover { color: #9a4a25; text-decoration: none; }
+.forge-choice a.link-internal { border-color: #e2c99c; background: #fffaf0; }
+.forge-choice a.link-internal:hover { background: #fbeed6; }
+#forge-bg::after { background: linear-gradient(rgba(255, 246, 229, 0.75), rgba(255, 246, 229, 0.92)); }
+.forge-toast { background: #fffaf0; color: var(--cs-ink); border: 1px solid #e2c99c; }
+meter::-webkit-meter-optimum-value { background: var(--cs-leaf); }

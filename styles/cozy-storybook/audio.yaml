@@ -1,0 +1,7 @@
+mood: warm, whimsical, gently curious
+instruments: [acoustic guitar, ukulele, glockenspiel, pizzicato strings, soft flute]
+tempo_bpm: [80, 115]
+music_prompt_prefix: "whimsical acoustic folk, light and warm, ukulele and glockenspiel, major key, cosy, no vocals"
+ambience: [birdsong, kettle and kitchen, light rain on a window, village market murmur]
+sfx_style: "soft, rounded, slightly playful; no harsh or violent sounds"
+avoid: [heavy drums, distortion, horror stingers]

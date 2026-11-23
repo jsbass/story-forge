@@ -1,0 +1,10 @@
+style: soft watercolour storybook illustration
+checkpoint: null
+suggested_checkpoints:
+  - "an illustration-focused SDXL or Illustrious checkpoint (Civitai: search 'watercolor storybook SDXL')"
+prompt_prefix: "children's storybook illustration, soft watercolour, warm pastel palette, gentle lighting, paper texture, whimsical"
+negative: "photo, realistic, 3d render, dark, horror, gore, text, watermark, harsh shadows"
+palette: ["#fff6e5", "#f6d6ad", "#e8a87c", "#85b79d", "#4a5d6b"]
+defaults:
+  bg: { params: { width: 1344, height: 768 } }
+  portrait: { params: { width: 832, height: 1216 } }

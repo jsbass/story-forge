@@ -1,0 +1,92 @@
+{
+  "comment": "Engines the Engine Advisor knows about. 'forge_support' is what Twine Forge can build today: supported (has an adapter in tools/engines/), planned, or not-planned. Feature fit: yes | partial | no.",
+  "features": {
+    "branching_text": "Branching hypertext with choices",
+    "stats": "Numeric meters / relationships",
+    "inventory": "Items and item-gated choices",
+    "turn_based_minigames": "Turn-based minigames (dice, code locks, puzzles)",
+    "hub_map": "Hub-and-spoke exploration, time budgets",
+    "realtime_timers": "Real-time timers and timed choices",
+    "realtime_action": "Real-time action, reflex gameplay",
+    "physics": "Physics simulation",
+    "free_movement": "Free movement on a tile map or open world",
+    "3d": "3D scenes",
+    "multiplayer": "Networked multiplayer",
+    "sprites_layered": "Layered character sprites and transitions (visual novel staging)",
+    "voice_over": "Voice-over per line",
+    "video": "Embedded video",
+    "large_story": "Very large stories (more than ~1,500 passages)",
+    "web": "Plays in a browser (itch.io, web)",
+    "desktop": "Desktop builds",
+    "mobile_app": "Native mobile app builds"
+  },
+  "engines": {
+    "sugarcube": {
+      "label": "SugarCube 2 (Twine)",
+      "forge_support": "supported",
+      "summary": "Browser hypertext with a full macro language and JavaScript; Twine Forge's default.",
+      "fit": {
+        "branching_text": "yes", "stats": "yes", "inventory": "yes", "turn_based_minigames": "yes", "hub_map": "yes",
+        "realtime_timers": "partial", "realtime_action": "partial", "physics": "no", "free_movement": "no", "3d": "no",
+        "multiplayer": "no", "sprites_layered": "partial", "voice_over": "yes", "video": "yes", "large_story": "partial",
+        "web": "yes", "desktop": "yes", "mobile_app": "partial"
+      },
+      "notes": {
+        "realtime_action": "Possible as a small canvas/JS widget inside a passage; keep it short and turn-based where you can.",
+        "sprites_layered": "Portraits and backgrounds are built in; full VN staging needs custom CSS/JS.",
+        "large_story": "One HTML file holds every passage; past ~1,500 passages load time and editing suffer.",
+        "mobile_app": "Via a web wrapper (e.g. Capacitor) - not built by Twine Forge."
+      }
+    },
+    "harlowe": {
+      "label": "Harlowe 3 (Twine)",
+      "forge_support": "planned",
+      "summary": "Twine's default format; friendlier syntax, less scripting power than SugarCube.",
+      "fit": {
+        "branching_text": "yes", "stats": "yes", "inventory": "yes", "turn_based_minigames": "partial", "hub_map": "yes",
+        "realtime_timers": "partial", "realtime_action": "no", "physics": "no", "free_movement": "no", "3d": "no",
+        "multiplayer": "no", "sprites_layered": "partial", "voice_over": "partial", "video": "partial", "large_story": "partial",
+        "web": "yes", "desktop": "partial", "mobile_app": "partial"
+      }
+    },
+    "ink": {
+      "label": "ink (inkle) + inkjs",
+      "forge_support": "planned",
+      "summary": "A narrative scripting language that excels at large, reactive branching text; runs on the web (inkjs) or inside Unity/Godot.",
+      "fit": {
+        "branching_text": "yes", "stats": "yes", "inventory": "partial", "turn_based_minigames": "partial", "hub_map": "yes",
+        "realtime_timers": "partial", "realtime_action": "partial", "physics": "partial", "free_movement": "partial", "3d": "partial",
+        "multiplayer": "no", "sprites_layered": "partial", "voice_over": "yes", "video": "partial", "large_story": "yes",
+        "web": "yes", "desktop": "yes", "mobile_app": "yes"
+      },
+      "notes": {
+        "realtime_action": "Through a host engine (Unity, Godot) that runs the ink story.",
+        "large_story": "Compiles to JSON and handles very large scripts well."
+      }
+    },
+    "renpy": {
+      "label": "Ren'Py",
+      "forge_support": "planned",
+      "summary": "The standard visual-novel engine: sprites, transitions, voice, rollback; desktop/mobile first.",
+      "fit": {
+        "branching_text": "yes", "stats": "yes", "inventory": "yes", "turn_based_minigames": "yes", "hub_map": "yes",
+        "realtime_timers": "yes", "realtime_action": "partial", "physics": "no", "free_movement": "partial", "3d": "no",
+        "multiplayer": "no", "sprites_layered": "yes", "voice_over": "yes", "video": "yes", "large_story": "yes",
+        "web": "partial", "desktop": "yes", "mobile_app": "yes"
+      },
+      "notes": { "web": "Web builds exist but are heavier and less mature than desktop builds." }
+    },
+    "godot": {
+      "label": "Godot 4",
+      "forge_support": "not-planned",
+      "summary": "A general 2D/3D game engine: anything real-time, at the cost of building the narrative layer yourself (or with ink/Dialogic).",
+      "fit": {
+        "branching_text": "partial", "stats": "yes", "inventory": "yes", "turn_based_minigames": "yes", "hub_map": "yes",
+        "realtime_timers": "yes", "realtime_action": "yes", "physics": "yes", "free_movement": "yes", "3d": "yes",
+        "multiplayer": "yes", "sprites_layered": "yes", "voice_over": "yes", "video": "yes", "large_story": "partial",
+        "web": "partial", "desktop": "yes", "mobile_app": "yes"
+      },
+      "notes": { "branching_text": "Needs a dialogue plugin or ink; Twine Forge's script pipeline doesn't target it." }
+    }
+  }
+}

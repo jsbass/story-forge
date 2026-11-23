@@ -413,6 +413,8 @@ Every automatic fix is committed separately (`qa-fix: ...`) so it can be reviewe
 
 ## 9. Build plan (narrative core first)
 
+**Status (2026-11-23):** Phases 1–4 are built. Deviations from the plan above: performance QA uses Playwright with Chrome DevTools Protocol (CDP) throttling instead of Lighthouse; the engine boundary is an adapter registry (`tools/engines/`, [engines.md](engines.md)) with SugarCube as the only buildable engine.
+
 ### Phase 1 — Narrative core (playable text-only game)
 - Plugin skeleton: `plugin.json`, skills, subagents, `/forge:*` commands.
 - Orchestrator: `forge.yaml`, `pipeline.json`, `deps.json`, gates, feedback log and routing, impact analysis, git commit/tag on each approval.

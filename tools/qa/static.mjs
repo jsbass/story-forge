@@ -20,10 +20,26 @@ const VAR_RE = /\$([A-Za-z_]\w*)/g;
 
 const unquote = (s) => (s.startsWith('"') ? JSON.parse(s) : s.slice(1, -1).replace(/\\'/g, "'"));
 
-/** Outgoing references from passage text. kind: link | goto | include */
-export function extractRefs(text) {
+const ARG_RE = new RegExp(`${STR}|\\S+`, 'g');
+
+/**
+ * Outgoing references from passage text. kind: link | goto | include
+ * @param moduleLinks  loop-module macros that navigate: [{macro, args?: [argIndex...], targets?: [passage...]}]
+ */
+export function extractRefs(text, moduleLinks = []) {
   const refs = [];
   let m;
+  for (const rule of moduleLinks) {
+    const re = new RegExp(`<<${rule.macro}(?:\\s+((?:${STR}|[^>"'])*))?>>`, 'g');
+    while ((m = re.exec(text))) {
+      const args = (m[1] || '').match(ARG_RE) || [];
+      for (const i of rule.args || []) {
+        const a = args[i];
+        if (a && /^["']/.test(a)) refs.push({ kind: 'link', to: unquote(a), label: `<<${rule.macro}>>` });
+      }
+      for (const t of rule.targets || []) refs.push({ kind: 'link', to: t, label: `<<${rule.macro}>>` });
+    }
+  }
   LINK_MACRO_RE.lastIndex = 0;
   while ((m = LINK_MACRO_RE.exec(text))) refs.push({ kind: 'link', to: unquote(m[2]), label: unquote(m[1]) });
   NAV_MACRO_RE.lastIndex = 0;
@@ -69,7 +85,7 @@ export function extractVars(text) {
  * @param {{id,scene?}[]} [o.expectedEndings]  from branch map
  * @param {string[]} [o.expectedScenes]        scene ids from branch map
  */
-export function analyzeStatic({ passages, start, expectedEndings = [], expectedScenes = [] }) {
+export function analyzeStatic({ passages, start, expectedEndings = [], expectedScenes = [], moduleLinks = [] }) {
   const findings = [];
   const add = (severity, kind, passage, message) => findings.push({ severity, kind, passage, message });
   const byName = new Map(passages.map((p) => [p.name, p]));
@@ -80,7 +96,7 @@ export function analyzeStatic({ passages, start, expectedEndings = [], expectedS
   const edges = [];
   const out = new Map();
   for (const p of passages) {
-    const refs = extractRefs(p.text);
+    const refs = extractRefs(p.text, isStoryPassage(p) ? moduleLinks : []);
     out.set(p.name, refs);
     for (const r of refs) {
       if (!byName.has(r.to)) {

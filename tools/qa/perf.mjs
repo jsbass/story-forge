@@ -75,6 +75,15 @@ const SESSION = async ({ n, start, seed }) => {
     (function poll() { if (window.__forgeTurn > t0 || Date.now() > until) resolve(window.__forgeTurn > t0); else setTimeout(poll, 0); })();
   });
   let restarts = 0, stuck = 0, maxSave = 0;
+  // Restarting at an ending must also reset the story variables (an exhausted time budget would
+  // otherwise send every restart straight back to the deadline passage).
+  const initial = JSON.stringify(S.State.variables);
+  const restart = () => {
+    const v = S.State.variables;
+    for (const k of Object.keys(v)) delete v[k];
+    Object.assign(v, JSON.parse(initial));
+    S.Engine.play(start);
+  };
   const saveSize = () => {
     try {
       if (S.Save.base64 && S.Save.base64.save) return S.Save.base64.save().length;
@@ -87,10 +96,10 @@ const SESSION = async ({ n, start, seed }) => {
     const links = Array.from(document.querySelectorAll('#passages a[data-passage]'));
     if ((p && p.tags.includes('ending')) || !links.length) {
       restarts++;
-      await turn(() => S.Engine.play(start));
+      await turn(restart);
     } else if (!(await turn(() => links[Math.floor(rand() * links.length)].click()))) {
       stuck++;
-      await turn(() => S.Engine.play(start));
+      await turn(restart);
     }
     await frame();
     if (i % 25 === 0) maxSave = Math.max(maxSave, saveSize());
@@ -111,6 +120,7 @@ async function runProfile(browser, url, profile, s, start) {
   const mobile = profile === 'mobile';
   const m = s.mobile;
   const context = await browser.newContext(mobile ? { viewport: { width: m.width, height: m.height }, deviceScaleFactor: m.scale, isMobile: true, hasTouch: true } : { viewport: { width: 1366, height: 768 } });
+  await context.addInitScript(() => { window.__forgeQA = true; }); // minigames expose outcome links
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e.message || e)));

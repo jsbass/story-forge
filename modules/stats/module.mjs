@@ -13,6 +13,8 @@
 
 export const description = 'Named meters (relationships, reputation, resources) that clamp to a range and gate branches.';
 
+export const usage = `<<stat "var" +2>>   conditions: $mara_aff >= 5`;
+
 export function validate(params) {
   const errs = [];
   if (!Array.isArray(params?.stats) || !params.stats.length) errs.push('params.stats must be a non-empty list');

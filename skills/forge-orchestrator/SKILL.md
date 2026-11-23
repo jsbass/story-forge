@@ -14,7 +14,7 @@ You run the pipeline. The role agents do the creative and technical work. You ho
 | # | Stage | Who does the work | Artifacts |
 |---|---|---|---|
 | 1 | `interview` | **You**, using the `story-interview` skill (needs the user) | `design/interview.md` |
-| 2 | `bible` | `story-planner` agent, then a check by `engine-advisor` | `design/story-bible.md`, `design/branch-map.yaml` |
+| 2 | `bible` | `story-planner` agent, then `engine-advisor` (`forge engine check`) | `design/story-bible.md`, `design/branch-map.yaml`, `forge.yaml engine` |
 | 3 | `characters` | `character-designer` agent | `characters/*.yaml`, `characters/*.md` |
 | 4 | `loops` | **You** run the loop conversation (`loop-design` skill), then the `loop-designer` agent writes it up | `design/loops/*` |
 | 5 | `script` | `dialog-writer` agent | `script/*.script.md` |
@@ -103,6 +103,11 @@ The `qa` stage can be approved when there are no open S1/S2 findings, or when th
 - **Approval needed, every time:** building desktop executables (`package desktop --build --yes`) downloads Electron (~100 MB+) from npm; publishing (`publish itch --yes`) is public. Ask first, with what will be downloaded or published. The user installs and logs in to butler themselves.
 - Feedback about size, load time or saves routes to `perf-optimizer`; about packaging to `game-packager`.
 
+## Style profiles and engine
+
+- **Style profiles** (`/forge:style`): the interview offers them (`forge style list`); `forge style apply <name> [--parts ..]` writes `design/style/prose.md` (dialog-writer reads it), `design/style/audio.yaml` (asset-generator reads it), `src/custom/style.css` (UI) and `forge.yaml art`. Applying prose/art mid-project makes scripts/assets out of date: run impact analysis and ask before regenerating. Offer `forge style save` once the user is happy with a game's look and voice.
+- **Engine** (`/forge:engine`): brief the `engine-advisor` after the bible is drafted and whenever a loop is added. It runs `forge engine check` and records the decision; present any blocker as a question to the user.
+
 ## Rollback
 
 `node .forge/forge.mjs rollback stage/<stage>/v<N>` restores that stage's artifacts and commits the result. Then re-approve that stage. Later stages become stale.
@@ -111,4 +116,4 @@ The `qa` stage can be approved when there are no open S1/S2 findings, or when th
 - Don't let agents approve or submit stages. Only you do that, and only after the user approves at the gate.
 - Don't regenerate downstream work without the impact list and the user's OK.
 - Don't edit generated folders (`src/story`, `src/engine`, `src/modules`).
-- Phase 4 features (shared style profiles, more loop modules, engines beyond Twine) aren't built yet. Record requests as feedback and tell the user they're planned.
+- Don't set an engine Twine Forge can't build (`forge engine set` refuses). If the design needs one, the engine-advisor explains the options and the user decides.

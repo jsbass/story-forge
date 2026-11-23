@@ -1,0 +1,3 @@
+:: explore-widgets [widget nobr]
+<<widget "spend">><<run setup.forge.explore.spend(_args[0])>><</widget>>
+<<widget "time_panel">><<set _ft to setup.forge.explore.cfg.time>><div class="forge-time" @data-low="_ft.warn_at !== null and State.variables[_ft.var] <= _ft.warn_at"><span class="forge-time-label"><<= _ft.label>></span><span class="forge-time-value"><<= State.variables[_ft.var]>></span><meter min="0" @max="_ft.start" @value="State.variables[_ft.var]"></meter></div><</widget>>

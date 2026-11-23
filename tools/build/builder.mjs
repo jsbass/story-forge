@@ -116,6 +116,8 @@ async function collectVariablesAndModules(project) {
   const invariants = [];
   const modules = {};
   const moduleFiles = [];
+  const moduleLinks = [];
+  const linters = [];
   const errors = [];
   const add = (name, init, source) => {
     const n = String(name).replace(/^\$/, '');
@@ -132,6 +134,8 @@ async function collectVariablesAndModules(project) {
     modules[m.id] = { type: m.type, ...params };
     for (const v of impl.variables ? impl.variables(m.params || {}) : []) add(v.name, v.init, `module ${m.id}`);
     invariants.push(...(impl.invariants ? impl.invariants(m.params || {}) : []));
+    if (impl.links) moduleLinks.push(...impl.links(m.params || {}).map((l) => ({ ...l, module: m.id })));
+    if (impl.lint) linters.push({ id: m.id, run: (passages) => impl.lint(m.params || {}, passages) });
     moduleFiles.push({ id: m.id, dir });
   }
   for (const c of project.characters) {
@@ -140,7 +144,7 @@ async function collectVariablesAndModules(project) {
   }
   for (const [k, v] of Object.entries(project.branchMap?.variables || {})) add(k, v, 'branch-map');
   for (const [k, v] of Object.entries(project.config.vars || {})) add(k, v, 'forge.yaml');
-  return { vars, invariants, modules, moduleFiles, errors };
+  return { vars, invariants, modules, moduleFiles, moduleLinks, linters, errors };
 }
 
 /**
@@ -265,6 +269,14 @@ export async function build(root, { modes = ['dev', 'release'] } = {}) {
   const dup = all.map((p) => p.name).filter((n, i, a) => a.indexOf(n) !== i);
   if (dup.length) throw new BuildError(dup.map((n) => ({ file: 'src', line: 0, message: `Duplicate passage name '${n}'` })));
 
+  // Loop-module checks over the story passages (unknown item ids, missing location passages, ...).
+  const storyPassages = all.filter((p) => !p.tags.some((t) => ['script', 'stylesheet', 'widget', 'debug'].includes(t)));
+  const lintErrors = vm.linters.flatMap((l) => l.run(storyPassages).map((e) => {
+    const src = e.passage ? all.find((p) => p.name === e.passage) : null;
+    return { file: src ? src.file : 'design/loops/loops.yaml', line: src ? src.line : 0, message: e.passage ? `${e.passage}: ${e.message}` : e.message };
+  }));
+  if (lintErrors.length) throw new BuildError(lintErrors);
+
   // 6. HTML
   if (!fs.existsSync(paths.formatJs)) throw new Error('SugarCube format not installed (vendor/sugarcube-2/format.js). Run: node .forge/forge.mjs setup');
   const format = loadStoryFormat(readText(paths.formatJs));
@@ -298,6 +310,7 @@ export async function build(root, { modes = ['dev', 'release'] } = {}) {
     endings: results.flatMap((r) => r.refs.endings),
     variables: Object.fromEntries([...vm.vars.entries()].map(([n, v]) => [n, v])),
     invariants: vm.invariants,
+    moduleLinks: vm.moduleLinks,
   };
   writeJson(path.join(paths.build, 'script-manifest.json'), manifest);
   writeJson(path.join(paths.build, 'forge-data.json'), dataCtx);

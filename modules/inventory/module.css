@@ -1,0 +1,7 @@
+/* Twine Forge module: inventory */
+.forge-inv { margin-top: 0.8em; font-size: 0.9em; }
+.forge-inv-title { opacity: 0.7; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.8em; margin-bottom: 0.3em; }
+.forge-inv-list { list-style: none; margin: 0; padding: 0; }
+.forge-inv-list li { padding: 0.15em 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); cursor: help; }
+.forge-inv-empty { opacity: 0.5; font-style: italic; }
+.forge-inv button { display: block; width: 100%; margin-top: 0.4em; font-size: 0.85em; }

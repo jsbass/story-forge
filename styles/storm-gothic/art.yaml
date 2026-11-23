@@ -1,0 +1,10 @@
+style: painterly dark coastal gothic
+checkpoint: null            # keep the project's checkpoint; any SDXL model works
+suggested_checkpoints:
+  - "a painterly or illustrative SDXL 1.0 checkpoint (Civitai: search 'painterly SDXL')"
+prompt_prefix: "oil painting, dramatic chiaroscuro, muted teal and amber palette, visible brush strokes, moody atmosphere"
+negative: "photo, 3d render, anime, cartoon, flat colors, text, watermark, signature, oversaturated"
+palette: ["#0f1a1f", "#24444f", "#7fb7be", "#e0a458", "#f2e6c9"]
+defaults:
+  bg: { params: { width: 1344, height: 768 } }
+  portrait: { params: { width: 832, height: 1216 } }

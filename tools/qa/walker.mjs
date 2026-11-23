@@ -32,7 +32,13 @@ const READ_STATE = () => {
     passage: p,
     tags: (story && story.tags) || [],
     turn: window.__forgeTurn || 0,
-    violations: inv.filter((i) => typeof v[i.var] === 'number' && (v[i.var] < i.min || v[i.var] > i.max)).map((i) => `$${i.var}=${v[i.var]} outside [${i.min}, ${i.max}]`),
+    violations: [
+      ...inv.filter((i) => i.min !== undefined && typeof v[i.var] === 'number' && (v[i.var] < i.min || v[i.var] > i.max)).map((i) => `$${i.var}=${v[i.var]} outside [${i.min}, ${i.max}]`),
+      ...inv.filter((i) => i.allowed && Array.isArray(v[i.var])).flatMap((i) => [
+        ...v[i.var].filter((x) => !i.allowed.includes(x)).map((x) => `$${i.var} holds unknown item '${x}'`),
+        ...(i.maxItems != null && v[i.var].length > i.maxItems ? [`$${i.var} holds ${v[i.var].length} items (capacity ${i.maxItems})`] : []),
+      ]),
+    ],
     errors: Array.from(document.querySelectorAll('#passages .error-view, #passages .error')).map((e) => e.textContent.trim()).slice(0, 3),
     links: Array.from(document.querySelectorAll('#passages a[data-passage]')).map((a) => ({ to: a.getAttribute('data-passage'), label: a.textContent.trim() })),
   };
@@ -79,6 +85,8 @@ export async function runWalks(root, { graph, html, walks = 60, maxSteps = 150, 
   const { chromium } = requirePlaywright(root);
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
+  // QA mode: minigames and map menus also show direct links to every outcome, so walks can reach them.
+  await context.addInitScript(() => { window.__forgeQA = true; });
   const url = pathToFileURL(html).href;
   const rand = rng(seed);
 
@@ -134,9 +142,17 @@ export async function runWalks(root, { graph, html, walks = 60, maxSteps = 150, 
         }
         const target = s.links[idx];
         linksTaken.add(`${s.passage}->${target.to}`);
-        await page.locator('#passages a[data-passage]').nth(idx).click();
+        // Baseline after any save/load round trip (re-rendering the passage also counts as a turn).
+        const turn = await page.evaluate(() => window.__forgeTurn || 0);
         try {
-          await page.waitForFunction((t) => (window.__forgeTurn || 0) > t, s.turn, { timeout: 5000 });
+          await page.locator('#passages a[data-passage]').nth(idx).click({ timeout: 5000 });
+        } catch (e) {
+          const now = await page.evaluate(() => ({ p: window.SugarCube.State.passage, n: document.querySelectorAll('#passages a[data-passage]').length })).catch(() => ({}));
+          add('S2', 'click-failed', s.passage, `Could not click '${target.label}' (link ${idx + 1} of ${s.links.length}; page now shows '${now.p}' with ${now.n} links): ${String(e.message).split('\n')[0]}`, route);
+          break;
+        }
+        try {
+          await page.waitForFunction((t) => (window.__forgeTurn || 0) > t, turn, { timeout: 5000 });
         } catch {
           add('S2', 'stuck', s.passage, `Clicking '${target.label}' did not navigate`, route);
           break;
@@ -149,17 +165,19 @@ export async function runWalks(root, { graph, html, walks = 60, maxSteps = 150, 
     return route;
   }
 
-  // 1. Directed: aim for every ending via its shortest static path.
-  for (const ending of graph.endings) {
-    const plan = shortestPath(graph, graph.start, ending);
-    if (!plan) continue;
-    log(`directed walk -> ${ending}`);
-    await playthrough(plan);
+  try {
+    // 1. Directed: aim for every ending via its shortest static path.
+    for (const ending of graph.endings) {
+      const plan = shortestPath(graph, graph.start, ending);
+      if (!plan) continue;
+      log(`directed walk -> ${ending}`);
+      await playthrough(plan);
+    }
+    // 2. Coverage-guided random walks.
+    for (let i = 0; i < walks; i++) await playthrough(null);
+  } finally {
+    await browser.close();
   }
-  // 2. Coverage-guided random walks.
-  for (let i = 0; i < walks; i++) await playthrough(null);
-
-  await browser.close();
   for (const e of graph.endings) if (!endingsReached.has(e)) add('S2', 'ending-not-reached', e, 'No automated playthrough reached this ending (check conditions or add walks)');
 
   const total = graph.nodes.length;

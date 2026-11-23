@@ -9,10 +9,12 @@ import { STAGES, loadPipeline, savePipeline, computeStatus, nextStage, transitio
 import { loadDeps, saveDeps, recordDeps, impactOf, staleArtifacts } from './lib/deps.mjs';
 import { addFeedback, listFeedback, resolveFeedback, suggestRoute } from './lib/feedback.mjs';
 import { commitAll, tag, tagExists, restorePaths, headShort, listTags } from './lib/git.mjs';
-import { build, compileScripts, BuildError } from './build/builder.mjs';
+import { build, compileScripts, BuildError, loadModuleType } from './build/builder.mjs';
 import { servePlaytest } from './build/serve.mjs';
 import { runStatic, runFunctional, characterQaInput, summarize } from './qa/report.mjs';
 import { runPerformance } from './qa/perf.mjs';
+import { engineFor, detectNeeds, fitReport, formatFit, setEngine, loadEngineCatalog, ADAPTERS } from './engines/index.mjs';
+import { listStyles, getStyle, applyStyle, saveStyle, readPart, PROJECT_FILES, userStylesDir } from './lib/styles.mjs';
 import { optimize, formatOptimize } from './release/optimize.mjs';
 import { packageGame, formatRelease, butlerPush, distributionSettings } from './release/package.mjs';
 
@@ -51,7 +53,17 @@ Release (Phase 3)
   package desktop --build --yes       also download Electron (~100 MB) and build the executables (after approval)
   release [--walks 30] [--skip-performance]   build + optimize + QA on the shipped build + package
   publish itch [--project user/game] [--channel html5] --yes   butler push (only after the user approves)
-  loops                               list loop modules and the variables they own
+  loops [types]                       the project's loop modules, or every module type the plugin offers
+
+Engine (Phase 4)
+  engine list                         engines the Engine Advisor knows, and which Twine Forge can build
+  engine check [--json]               what the design needs vs. each engine (blockers, risks, recommendation)
+  engine set <name> [--rationale ..] [--risks a,b]   record the decision in forge.yaml (buildable engines only)
+
+Style profiles (Phase 4) - shared library in ~/.forge/styles (plus built-in examples)
+  style list | show <name>
+  style apply <name> [--parts prose,art,ui,audio]   combine profiles by applying different parts
+  style save <name> [--parts ..] [--description ".."] [--force]   save this project's style to the library
   template [name]                     list templates, or print one (e.g. character.yaml, forge-script)
 
 Assets (Phase 2) - anything that downloads or installs needs --yes, given only after the user approves
@@ -127,6 +139,41 @@ function formatStatus(s) {
   return lines.join('\n');
 }
 
+function styleCommand(root, pos, flags) {
+  const sub = pos[0] || 'list';
+  if (sub === 'list') {
+    const styles = listStyles(root);
+    if (flags.json) return out(styles, true);
+    if (!styles.length) return console.log(`No style profiles yet. Save one from a project: forge style save <name>  (library: ${userStylesDir()})`);
+    for (const s of styles) console.log(`${s.name.padEnd(18)} ${s.builtin ? '[built-in] ' : ''}${s.description}\n${' '.repeat(19)}parts: ${s.parts.join(', ')}`);
+    return;
+  }
+  if (sub === 'show') {
+    const s = getStyle(pos[1], root);
+    if (flags.json) return out({ ...s, content: Object.fromEntries(s.parts.map((p) => [p, readPart(s, p, root)])) }, true);
+    console.log(`# ${s.name}${s.builtin ? ' (built-in)' : ''}\n${s.description}\n${s.dir}\n`);
+    for (const p of s.parts) {
+      const v = readPart(s, p, root);
+      console.log(`## ${p}  ->  ${PROJECT_FILES[p]}\n${typeof v === 'string' ? v.trim() : JSON.stringify(v, null, 2)}\n`);
+    }
+    return;
+  }
+  if (!root) throw new Error('Run this inside a Forge project (no forge.yaml found)');
+  if (sub === 'apply') {
+    if (!pos[1]) throw new Error('Usage: forge style apply <name> [--parts prose,art,ui,audio]');
+    const r = applyStyle(root, pos[1], { parts: list(flags.parts) });
+    console.log(`Applied ${pos[1]}: ${r.applied.join(', ') || 'nothing'}${r.skipped.length ? ` (profile has no ${r.skipped.join(', ')})` : ''}\n  wrote ${r.files.join(', ')}`);
+    return;
+  }
+  if (sub === 'save') {
+    if (!pos[1]) throw new Error('Usage: forge style save <name> [--parts ...] [--description "..."] [--force]');
+    const r = saveStyle(root, pos[1], { parts: list(flags.parts), description: typeof flags.description === 'string' ? flags.description : '', force: !!flags.force });
+    console.log(`Saved ${pos[1]} (${r.saved.join(', ')}) to ${r.dir}${r.missing.length ? `\n  not in this project, so not saved: ${r.missing.join(', ')}` : ''}`);
+    return;
+  }
+  throw new Error('Usage: forge style list | show <name> | apply <name> [--parts ..] | save <name> [--parts ..] [--description ..] [--force]');
+}
+
 function printFunctional(root, r) {
   console.log(`Functional QA${r.file.includes('functional-') ? ` (${path.basename(r.file, '.md').slice('functional-'.length)})` : ''} (build ${r.buildId}): ${r.summary.pass ? 'PASS' : 'FAIL'}  S1 ${r.summary.S1} · S2 ${r.summary.S2} · S3 ${r.summary.S3} · S4 ${r.summary.S4}`);
   console.log(`  coverage ${r.walk.coverage.percent}% · endings ${r.walk.endings.reached.length}/${r.walk.endings.total} · ${r.walk.walks} playthroughs`);
@@ -152,6 +199,7 @@ async function main() {
   // These work with or without a project.
   if (cmd === 'assess') return assessCommand(findProjectRoot(), flags);
   if (cmd === 'models') return modelsCommand(findProjectRoot(), pos, flags);
+  if (cmd === 'style') return styleCommand(findProjectRoot(), pos, flags);
 
   if (cmd === 'new') {
     if (!pos[0]) throw new Error('Usage: forge new <dir> --title "Title"');
@@ -255,7 +303,7 @@ async function main() {
     }
 
     case 'build': {
-      const info = await build(root, { modes: flags['dev-only'] ? ['dev'] : ['dev', 'release'] });
+      const info = await engineFor(loadProject(root).config).build(root, { modes: flags['dev-only'] ? ['dev'] : ['dev', 'release'] });
       if (flags.json) return out(info, true);
       console.log(`Build ${info.id}: ${info.storyPassages} story passages, ${info.endings.length} endings, start '${info.start}'`);
       for (const [mode, o] of Object.entries(info.outputs)) console.log(`  ${mode.padEnd(7)} ${o.html}  (${Math.round(o.bytes / 1024)} KB + ${o.mediaFiles} media files, ${Math.round(o.mediaBytes / 1024)} KB)`);
@@ -320,7 +368,7 @@ async function main() {
 
     case 'release': {
       // Build -> optimize -> functional QA on the shipped build -> performance QA -> package.
-      const info = await build(root, { modes: ['dev', 'release'] });
+      const info = await engineFor(loadProject(root).config).build(root, { modes: ['dev', 'release'] });
       console.log(`Build ${info.id}: ${info.storyPassages} story passages, ${info.endings.length} endings`);
       if (info.media.missing.length) console.log(`  note: ${info.media.missing.length} media cue(s) have no approved asset and are skipped in release`);
       console.log(formatOptimize(await optimize(root, { log: () => {} })));
@@ -350,7 +398,39 @@ async function main() {
     case 'assets':
       return assetsCommand(root, pos, flags);
 
+    case 'engine': {
+      const sub = pos[0] || 'check';
+      if (sub === 'list') {
+        const cat = loadEngineCatalog();
+        for (const [id, e] of Object.entries(cat.engines)) console.log(`${id.padEnd(10)} ${e.label.padEnd(24)} [${ADAPTERS[id] ? 'buildable' : e.forge_support}]  ${e.summary}`);
+        return;
+      }
+      if (sub === 'check') {
+        const { needs, passages } = detectNeeds(root);
+        const report = fitReport(needs);
+        const current = loadProject(root).config.engine?.name || 'sugarcube';
+        if (flags.json) return out({ current, needs, passages, ...report }, true);
+        console.log(`Current engine: ${current}\n`);
+        console.log(formatFit(needs, passages, report));
+        return;
+      }
+      if (sub === 'set') {
+        if (!pos[1]) throw new Error('Usage: forge engine set <name> [--rationale ".."] [--risks a,b]');
+        setEngine(root, pos[1], { rationale: typeof flags.rationale === 'string' ? flags.rationale : '', risks: list(flags.risks) });
+        return console.log(`forge.yaml engine: ${pos[1]}`);
+      }
+      throw new Error('Usage: forge engine list | check [--json] | set <name> [--rationale ..] [--risks a,b]');
+    }
+
     case 'loops': {
+      if (pos[0] === 'types') {
+        for (const type of fs.readdirSync(path.join(PLUGIN_ROOT, 'modules'))) {
+          const { impl } = await loadModuleType(type);
+          console.log(`${type.padEnd(10)} ${impl.description || ''}${impl.usage ? `\n${' '.repeat(11)}${impl.usage}` : ''}`);
+        }
+        console.log(`\nParameters and examples: the header of modules/<type>/module.mjs (forge template loops.yaml)`);
+        return;
+      }
       const project = loadProject(root);
       const mods = project.loops.modules || [];
       if (!mods.length) return console.log('No loop modules in design/loops/loops.yaml');

@@ -44,8 +44,10 @@ performance:               # qa-performance budgets
   budgets: { first_passage_ms: 2000, transition_ms: 100, html_kb: 2048, save_kb: 100, heap_growth_mb: 20, total_mb: 100 }
   mobile: { cpu_slowdown: 4, download_kbps: 9000, upload_kbps: 1500, latency_ms: 150 }
   long_session: 500
-style_profile: null
-art:                   # chosen in the Art Direction step of the interview
+engine:
+  name: sugarcube      # forge engine check / forge engine set (Engine Advisor)
+style_profile: null    # filled in by forge style apply: which profile each part (prose, art, ui, audio) came from
+art:                  # chosen in the Art Direction step of the interview
   style: null          # e.g. "painterly dark fantasy"
   checkpoint: null     # ComfyUI checkpoint file used for images
   prompt_prefix: ""    # added before every image prompt (style words, LoRA trigger words)

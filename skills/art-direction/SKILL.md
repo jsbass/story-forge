@@ -14,7 +14,9 @@ node .forge/forge.mjs assess
 Tell the user what this machine can make now (images, sfx, music, video) and what it can't. Mention any unfinished Stability Matrix downloads it lists.
 
 ## 2. Propose 3–4 art styles
-Base them on `design/interview.md` (genre, tone, audience) and the story bible if it exists, for example: *painterly dark fantasy*, *clean anime visual novel*, *noir photographic*, *storybook watercolour*.
+If a style profile's art part was applied in the interview (`forge.yaml style_profile.art`), lead with that style: it already set `art.style`, `prompt_prefix`, `negative` and `palette`, and lists `suggested_checkpoints` (`forge style show <name>`). Only the checkpoint usually needs choosing on this machine.
+
+Otherwise base them on `design/interview.md` (genre, tone, audience) and the story bible if it exists, for example: *painterly dark fantasy*, *clean anime visual novel*, *noir photographic*, *storybook watercolour*.
 
 For each style, give:
 - one line describing it
@@ -55,7 +57,7 @@ art:
   negative: "photo, 3d render, text, watermark, <avoided content>"
   defaults: {}            # e.g. bg: { workflow: sdxl-image-upscale } once upscaling is ready
 ```
-Add the same summary under "Presentation" in `design/interview.md`.
+Add the same summary under "Presentation" in `design/interview.md`. (`forge style save <name> --parts art` keeps it for future games.)
 
 ## Mid-project upgrades (/forge:upgrade-assets)
 1. Run `assess`. It compares the new scan with the previous one and prints:

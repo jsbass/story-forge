@@ -2,7 +2,7 @@
 
 A Claude Code plugin that turns a game idea into a playable, tested **Twine (SugarCube 2)** game. Role-specific agents do the work, and you approve each stage at a gate. The full design is in [docs/SPEC.md](docs/SPEC.md).
 
-**Status: Phases 1–3.**
+**Status: Phases 1–4 (the full spec).**
 - **Phase 1, the narrative core:** a text-only game end to end. Interview, story bible, characters, game loops, script, build, then QA and playtest.
 - **Phase 2, assets:**
   - a platform assessment of the GPU and ComfyUI
@@ -15,7 +15,10 @@ A Claude Code plugin that turns a game idea into a playable, tested **Twine (Sug
   - performance QA in headless Chromium: desktop and a throttled phone profile, checked against budgets
   - packaging for an itch.io zip, a single HTML file, a static website, and an Electron desktop app
 
-Shared style profiles and more loop modules come in Phase 4.
+- **Phase 4, polish:**
+  - shared style profiles for prose, art, UI and audio: two built-in examples, plus your own library in `~/.forge/styles`
+  - three more loop modules: `inventory` (items and combine puzzles), `minigame` (dice skill checks and code locks), and `explore` (a hub map with a time budget)
+  - an Engine Advisor that scores the design against SugarCube, Harlowe, ink, Ren'Py and Godot, behind an adapter boundary that leaves room for other engines (see [docs/engines.md](docs/engines.md))
 
 Phase 2 needs ComfyUI running (by default at `http://127.0.0.1:8188`). These workflows have been tested live on an RTX 3070 (8 GB):
 
@@ -56,6 +59,8 @@ The commands are namespaced `/forge:*`.
 | `/forge:upgrade-assets` | Installs approved models mid-project, then unblocks or regenerates assets |
 | `/forge:optimize` | Optimizes media and checks the performance budgets |
 | `/forge:release` | Runs a final QA pass on the optimized build and packages every distribution target |
+| `/forge:style [list\|show\|apply\|save]` | Manages shared style profiles |
+| `/forge:engine` | Checks which engine fits the design and records the decision |
 
 `/forge:new` installs the following **into the game project**. The plugin itself has no install step.
 - `yaml` and `playwright` from npm
@@ -79,7 +84,9 @@ The commands are namespaced `/forge:*`.
 | `workflows/` | Built-in ComfyUI workflows: SDXL images and drafts, upscaling, IP-Adapter portraits, Stable Audio, ACE-Step 1.5, Wan 2.2 |
 | `assets-catalog.json` | Models the assessor may propose, with verified sources and checksums |
 | `engine/` | The SugarCube runtime: widgets, settings, media playback, the debug overlay |
-| `modules/stats/` | The first loop module: clamped meters, a sidebar and toasts |
+| `modules/` | Loop modules: `stats` (meters), `inventory` (items and recipes), `minigame` (skill checks and code locks), `explore` (hub map and time budget) |
+| `styles/` | Built-in style profiles: `storm-gothic` and `cozy-storybook` |
+| `engines.json`, `tools/engines/` | The engine catalog, the fit check, and the build adapters |
 | `templates/` | Starter files for each stage (`forge template <name>`) |
 | `examples/lantern-keeper/` | A tiny complete game used for end-to-end testing |
 

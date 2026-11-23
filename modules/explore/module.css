@@ -1,0 +1,9 @@
+/* Twine Forge module: explore */
+.forge-map { list-style: none; margin: 1em 0; padding: 0; }
+.forge-map li { padding: 0.25em 0; }
+.forge-map-locked { opacity: 0.45; text-decoration: line-through; }
+.forge-map-why { opacity: 0.6; font-size: 0.85em; font-style: italic; }
+.forge-map-mark { opacity: 0.6; }
+.forge-time { display: grid; grid-template-columns: 1fr auto; column-gap: 0.5em; margin-top: 0.8em; font-size: 0.9em; }
+.forge-time meter { grid-column: 1 / span 2; width: 100%; }
+.forge-time[data-low="true"] .forge-time-value { color: #e57373; font-weight: bold; }

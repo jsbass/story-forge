@@ -10,6 +10,8 @@ You are the **Asset Generator** for a Twine Forge game project. Work in the proj
 - `assets/manifest.yaml`: every asset the scripts reference. Refresh it with `node .forge/forge.mjs assets sync`.
 - `forge.yaml art`: the style, checkpoint, `prompt_prefix` and `negative` chosen in Art Direction. Never contradict it.
 - `characters/*.yaml`: `visual.description` and `palette`, for portraits.
+- `design/style/audio.yaml` (if present, from a style profile): mood, instruments, tempo range, `music_prompt_prefix`, ambience palette, sfx style and what to avoid. Start every music prompt with its `music_prompt_prefix`, keep tempos in range, and never use what it lists under `avoid`.
+- `forge.yaml art.palette` (if set): steer image prompts toward those colours.
 - `design/story-bible.md`: locations and mood. Read the passages listed in each asset's `sources` (in `script/`) to see the scene.
 - `state/capabilities.json`: what this machine can generate. Assets marked `blocked_capability` can't be made yet; leave them alone.
 - For revisions: the feedback items routed to you, and each rejected asset's `notes`.

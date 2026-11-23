@@ -1,0 +1,5 @@
+:: inventory-widgets [widget nobr]
+<<widget "give">><<run setup.forge.inv.give(_args[0])>><</widget>>
+<<widget "take">><<run setup.forge.inv.take(_args[0])>><</widget>>
+<<widget "combine">><<run setup.forge.inv.combine(_args[0], _args[1])>><</widget>>
+<<widget "inventory_panel">><div class="forge-inv"><div class="forge-inv-title">Carrying</div><<if setup.forge.inv.items().length is 0>><div class="forge-inv-empty">Nothing</div><<else>><ul class="forge-inv-list"><<for _fi range setup.forge.inv.items()>><li @title="_fi.desc"><<= _fi.label>></li><</for>></ul><</if>><<for _fr range setup.forge.inv.available()>><<capture _fr>><<button `"Combine: " + setup.forge.inv.items().filter(function (i) { return _fr.use.includes(i.id); }).map(function (i) { return i.label; }).join(" + ")`>><<run setup.forge.inv.combine(_fr.use[0], _fr.use[1])>><<run UIBar.update()>><</button>><</capture>><</for>></div><</widget>>

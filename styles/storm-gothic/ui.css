@@ -1,0 +1,13 @@
+/* Storm gothic: candlelit text on a deep sea-blue night. */
+:root { --sg-ink: #f2e6c9; --sg-dim: #a9b8b6; --sg-amber: #e0a458; --sg-sea: #0f1a1f; --sg-panel: rgba(12, 22, 26, 0.86); }
+body { background: var(--sg-sea); color: var(--sg-ink); }
+#story { font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif; font-size: calc(1.08rem * var(--forge-text-scale, 1)); line-height: 1.65; }
+.passage { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
+#ui-bar { background: var(--sg-panel); border-right: 1px solid rgba(224, 164, 88, 0.25); }
+#ui-bar a, #menu li a { color: var(--sg-ink); }
+a.link-internal, a.link-internal:visited { color: var(--sg-amber); }
+a.link-internal:hover { color: #ffd08a; text-decoration: none; }
+.forge-choice a.link-internal { border-color: rgba(224, 164, 88, 0.45); background: rgba(15, 26, 31, 0.55); }
+.forge-choice a.link-internal:hover { background: rgba(224, 164, 88, 0.12); }
+meter::-webkit-meter-optimum-value { background: var(--sg-amber); }
+.forge-toast { background: var(--sg-panel); color: var(--sg-ink); border: 1px solid rgba(224, 164, 88, 0.35); }

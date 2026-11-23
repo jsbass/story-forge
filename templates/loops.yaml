@@ -1,4 +1,5 @@
 # Active loop modules. Each module type lives in the plugin's modules/<type>/ folder.
+# `node .forge/forge.mjs loops types` lists them; delete the examples you don't use.
 modules:
   - id: relationships
     type: stats
@@ -6,3 +7,36 @@ modules:
     params:
       stats:
         - { var: mara_aff, label: "Mara", min: 0, max: 10, init: 3, visible: true, notify: true }
+
+  # - id: pack
+  #   type: inventory
+  #   doc: design/loops/pack.md
+  #   params:
+  #     var: inv              # $inv is an array of item ids
+  #     capacity: 6
+  #     start: [lantern]
+  #     items:
+  #       - { id: lantern, label: "Storm lantern", desc: "Dented brass, half full of oil." }
+  #       - { id: rope, label: "Coil of rope" }
+  #       - { id: hook, label: "Iron hook" }
+  #       - { id: grapple, label: "Grappling line" }
+  #     recipes:
+  #       - { use: [rope, hook], makes: grapple, message: "You knot the rope to the hook." }
+
+  # - id: trials
+  #   type: minigame
+  #   doc: design/loops/trials.md
+  #   params:
+  #     dice: 20
+  #     show_odds: true
+  #     locks:
+  #       - { id: vault, code: "1847", hint: "The year on the plaque.", attempts: 3 }
+
+  # - id: night
+  #   type: explore
+  #   doc: design/loops/night.md
+  #   params:
+  #     time: { var: hours, start: 8, label: "Hours until dawn", expire: dawn, warn_at: 2, unit: h }
+  #     locations:
+  #       - { id: cellar, passage: cellar, label: "The cellar", cost: 2 }
+  #       - { id: lamp, passage: lamp_room, label: "The lamp room", cost: 1, requires: '$inv.includes("lantern")', locked_text: "Too dark without a lantern" }

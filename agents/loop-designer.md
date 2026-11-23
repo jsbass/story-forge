@@ -14,12 +14,22 @@ You are the **Game Loop Designer** for a Twine Forge project. Work in the projec
 - `design/loops/loops.yaml`: the active modules and their parameters. Start from `node .forge/forge.mjs template loops.yaml`.
 - `design/loops/<loop-id>.md`: one design doc per module. Start from `node .forge/forge.mjs template loop.md`.
 
-## Available module types (v1)
+## Available module types
+`node .forge/forge.mjs loops types` lists them; each `modules/<type>/module.mjs` header (in the plugin) has the full parameter reference and an example.
+
 | type | What it does | Script usage |
 |---|---|---|
-| `stats` | Named numeric meters (relationships, reputation, resources). Values are clamped to min/max, shown in the sidebar, and changes show a toast. | `<<stat "var" delta>>`, and conditions such as `$var >= 5` |
+| `stats` | Named numeric meters (relationships, reputation, resources). Clamped to min/max, shown in the sidebar, toasts on change. | `<<stat "var" delta>>`; conditions like `$var >= 5` |
+| `inventory` | Items the player carries (optional `capacity`, `start` items), combine `recipes`. Sidebar list with "Combine" buttons. | `<<give "id">>` `<<take "id">>` `<<combine "a" "b">>`; conditions `$inv.includes("id")` |
+| `minigame` | Turn-based challenges that end in a success or failure passage: dice `skill_check`s against a stat, and code `locks` with limited attempts. | `<<skill_check "label" "statVar" dc "success" "failure">>`, `<<codelock "lockId" "success" "failure">>` |
+| `explore` | Hub-and-spoke `locations` with travel costs (`requires` conditions, locked text, visited marks) and an optional `time` budget with an `expire` passage. | `<<map_menu>>` in the hub scene, `<<spend n>>`; conditions `$hours > 2` |
 
-If the design needs something the existing modules can't do (inventory, timers, minigames), write the design doc anyway and mark it with `status: needs-module` at the top. The game-builder or a later phase will implement the module type. Don't invent a `type` that doesn't exist in `loops.yaml`, because the build will fail.
+Several modules combine well (e.g. `explore` + `inventory` locks a location until an item is found; `minigame` checks read a `stats` meter). The build checks module usage: unknown items, locks, missing location passages and malformed macros are build errors.
+
+If the design needs something these can't do (real-time timers, card battles, a custom puzzle), write the design doc anyway and mark it with `status: needs-module` at the top; the game-builder implements it as custom code (`src/custom/`). Don't invent a `type` in `loops.yaml`, because the build will fail.
+
+## QA-friendliness
+Automated playthroughs click links. Minigames and the map expose `[QA]` outcome links in QA runs, but gates that need several steps in a row (find item A, then B, then combine, within a time budget) are rarely hit by random walks: say in the doc which walk count QA should use (e.g. `--walks 200`) or keep chains short.
 
 ## Design rules
 - Every loop must express a story theme. Explain the link in the doc.

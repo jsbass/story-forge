@@ -17,10 +17,13 @@ Loops are modules that can be added, tuned or removed at any time. Your job is t
 - **Stakes:** which endings or branches should depend on it, and how hard should the good outcomes be to reach?
 - **Scope:** how many meters or items there should be. Recommend 2–3 for a short game.
 
-Module types available in v1:
-- `stats`: clamped numeric meters with a sidebar and toasts
+Module types available (`node .forge/forge.mjs loops types`):
+- `stats`: clamped numeric meters with a sidebar and toasts (relationships, reputation, resources)
+- `inventory`: items, capacity, combine recipes, item-gated choices (puzzles)
+- `minigame`: dice skill checks against a stat, code locks with limited attempts
+- `explore`: hub-and-spoke map with travel costs and an optional time budget/deadline
 
-If the user wants something else (inventory, timers, minigames), record it as a `needs-module` design. The game-builder will implement it as custom code during the build stage, and it may become a reusable module later.
+Offer combinations when they serve the theme ("the island map costs daylight; the cave needs the grappling line you build from what you find"). If the user wants something none of these do (real-time timers, card battles, a bespoke puzzle), record it as a `needs-module` design: the game-builder implements it as custom code, and it can become a reusable module later. Mention to the user that real-time or physics-heavy ideas fit a browser text engine poorly; the `engine-advisor` will flag them.
 
 ## 3. Delegate
 Brief the `loop-designer` agent with:

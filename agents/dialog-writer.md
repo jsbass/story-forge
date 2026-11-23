@@ -14,6 +14,7 @@ node .forge/forge.mjs template forge-script
 ## Inputs
 - `design/branch-map.yaml`: the scenes, exits, gates and endings you must implement
 - `design/story-bible.md`: tone, prose voice and themes
+- `design/style/prose.md` (if present, from a style profile): voice, tense, rhythm, vocabulary and things to avoid. Follow it unless the bible explicitly overrides a point.
 - `characters/*.yaml`: each character's voice, knowledge timeline and arc (**the source of truth**)
 - `design/loops/loops.yaml` and the loop docs: which variables exist and how to change them
 - `forge.yaml`: rating and avoided themes

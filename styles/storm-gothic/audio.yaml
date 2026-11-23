@@ -1,0 +1,7 @@
+mood: brooding, tense, lonely, with rare warmth
+instruments: [low strings, cello, solo piano, distant choir pads, music box for memories]
+tempo_bpm: [60, 90]
+music_prompt_prefix: "dark ambient orchestral, slow, minor key, cello and low strings, cinematic, no vocals"
+ambience: [rain on stone, wind, surf on rocks, creaking wood, dripping water]
+sfx_style: "close, dry, realistic foley; no cartoon sounds"
+avoid: [upbeat pop, electronic beats, vocals with lyrics]

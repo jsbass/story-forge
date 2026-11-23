@@ -32,7 +32,7 @@ Forge Script is the dialog format the Dialog Writer uses. Files live in `script/
 | `* [Label] -> target {mods}` | A choice. Consecutive choices are grouped into one choice list. | `<<link "Label" "target">>` |
 | `-> target [Label]` | A single "Continue" link (the label defaults to *Continue*). | link |
 | `END <id> "Title"` or `END <id> — Title` | Marks the passage as an ending (it gets the `ending` tag and an ending screen). | `<<forge_ending "id" "Title">>` |
-| `<<macro …>>` | A raw SugarCube line, for loop-module widgets like `<<stat "mara_aff" 2>>`. | as written |
+| `<<macro …>>` | A raw SugarCube line, for loop-module macros like `<<stat "mara_aff" 2>>`, `<<give "rope">>`, `<<map_menu>>` or `<<skill_check "Climb" "grit" 12 "top" "fall">>`. `node .forge/forge.mjs loops types` lists them. | as written |
 
 ### Media cues at runtime
 | Cue | Behaviour |
@@ -63,7 +63,8 @@ Separate modifiers with `;`.
 - Every choice target must exist (in any script file, or in `src/custom/*.twee`).
 - Every speaker must have a `characters/<id>.yaml` sheet (once any sheets exist).
 - Every `?? if` needs a matching `?? end` in the same passage.
-- Every passage needs a way forward (a choice or `->`) or an `END`. Otherwise QA reports a dead end.
+- Every passage needs a way forward (a choice or `->`) or an `END`. Otherwise QA reports a dead end. Loop-module macros that navigate count as a way forward: `<<map_menu>>` (to every location and the time-out passage), `<<skill_check>>` and `<<codelock>>` (to their success and failure passages).
+- Loop-module arguments must exist: item ids in `<<give>>`/`<<take>>`/`<<combine>>`/`$inv.includes()`, lock ids in `<<codelock>>`, and the passages named in `explore` locations. The build fails otherwise.
 - Every variable that is read must be set somewhere or declared (in a loop module, character `affinity_var`, branch-map `variables`, or `forge.yaml vars`).
 - Every ending listed in `design/branch-map.yaml` must have an `END` with the same id.
 

@@ -24,7 +24,8 @@ You interview the user directly; don't delegate this to a subagent. The goal is 
 4. **World and tone:** genre, three tone adjectives, the setting, and the themes to explore.
 5. **Characters:** who the user already imagines. Sketches are fine, because the Character Designer develops them later.
 6. **Game loops:** which loops they want (stats/relationships, inventory and puzzles, minigames, exploration/time, or something else) and what each should make the player feel. Say that loops can be added later with `/forge:add-loop`.
-7. **Presentation:** audio mood, voice-over on or off (written to `forge.yaml voice_over`), a style profile to reuse, and the distribution targets.
+7. **Presentation:** audio mood, voice-over on or off (written to `forge.yaml voice_over`), and the distribution targets.
+   **Style profile:** run `node .forge/forge.mjs style list` and offer the profiles (built-in examples plus the user's own library), each in one line. The user can take one whole, mix parts from several (e.g. prose from one, UI from another), or start fresh. Apply with `node .forge/forge.mjs style apply <name> [--parts prose,ui]`; it writes `design/style/prose.md`, `design/style/audio.yaml`, `src/custom/style.css` and the `forge.yaml art` keys. A profile's art part feeds step 8 as the starting point, so confirm or adjust it there rather than asking twice.
 8. **Art direction:** run the `art-direction` skill. It checks the platform, proposes styles with quick samples, picks or installs models (only with the user's approval), and records `forge.yaml art`.
 
 ## Finish
@@ -32,3 +33,4 @@ You interview the user directly; don't delegate this to a subagent. The goal is 
 2. Update `forge.yaml`: `size`, `rating.target`, `rating.avoid`, `voice_over` and `art`. Edit the existing keys rather than rewriting the file.
 3. `node .forge/forge.mjs stage submit interview`
 4. Run the gate: summarise the concept in about 8 lines and ask the user to approve it or request changes.
+5. Later, when the user likes how the game turned out, offer to save its style for future games: `node .forge/forge.mjs style save <name> --description "..."` (saves to `~/.forge/styles/`).

@@ -1,0 +1,11 @@
+/* Twine Forge module: minigame */
+.forge-mg { margin: 1em 0; padding: 0.8em 1em; border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 8px; background: rgba(0, 0, 0, 0.25); }
+.forge-mg-title { font-weight: bold; margin-bottom: 0.2em; }
+.forge-mg-detail { opacity: 0.75; font-size: 0.9em; margin-bottom: 0.5em; }
+.forge-mg-row { display: flex; gap: 0.5em; margin-bottom: 0.4em; }
+.forge-mg-input { flex: 1; min-width: 0; font: inherit; padding: 0.2em 0.5em; letter-spacing: 0.15em; }
+.forge-mg-result { margin: 0.4em 0; }
+.forge-mg-pass { color: #9bc995; }
+.forge-mg-fail { color: #e57373; }
+.forge-mg-go { display: inline-block; margin-right: 1em; }
+.forge-mg-qa { margin-top: 0.5em; font-size: 0.8em; opacity: 0.6; }

@@ -28,7 +28,7 @@ export function expectations(project) {
 
 export function runStatic(root) {
   const b = loadBuild(root);
-  const res = analyzeStatic({ passages: b.passages, start: b.info.start, ...expectations(b.project) });
+  const res = analyzeStatic({ passages: b.passages, start: b.info.start, moduleLinks: b.manifest?.moduleLinks || [], ...expectations(b.project) });
   writeJson(path.join(b.reportDir, 'static.json'), res);
   return { ...b, static: res };
 }

@@ -15,6 +15,8 @@ The report is written to `qa/reports/<build-id>/functional.md`, with `static.jso
 
 Bigger stories need more walks. Use 100–200 for more than 150 passages, and raise `--max-steps` if you see `long-walk` findings.
 
+Loop modules: in QA runs, minigames (`skill_check`, `codelock`) and the `explore` map show extra `[QA]` links to every outcome, so walks can reach both branches without rolling dice or typing codes. Locks on items or time are **not** bypassed. If a passage behind a multi-step gate (find items, combine, within a time budget) is unvisited, re-run with `--walks 200` (or the count the loop doc suggests) before reporting it; only then is `ending-not-reached` likely a real design problem (e.g. an impossible recipe or too little time), which goes to the loop-designer. A `click-failed` finding means a link vanished or was covered when clicked: report it with the route (game-builder).
+
 ## Severity and the fix policy
 `forge.yaml limits.qa_fix_retries` (default 3) caps automatic fix attempts per finding.
 
